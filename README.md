@@ -1,0 +1,1 @@
+# dynatrace-ai-mcp-workshop
