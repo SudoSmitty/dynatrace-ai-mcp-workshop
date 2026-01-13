@@ -119,24 +119,14 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 1. When the application starts, VS Code will show a popup about port 8000. Click **"Open in Browser"**
 
-2. You should see a JSON response:
-   ```json
-   {
-     "status": "healthy",
-     "attendee_id": "jsmith",
-     "service_name": "ai-chat-service-jsmith"
-   }
-   ```
+2. You should see the **AI Chat Interface** - a beautiful web UI for chatting with the AI assistant!
 
-3. Test the chat endpoint using the terminal (open a new terminal with `+`):
+3. Try sending a message like:
+   > "What is Dynatrace?"
 
-   ```bash
-   curl -X POST http://localhost:8000/chat \
-     -H "Content-Type: application/json" \
-     -d '{"message": "What is Dynatrace?"}'
-   ```
+4. You should receive an AI-generated response in the chat!
 
-4. You should receive an AI-generated response!
+> **💡 Tip:** If you miss the popup, click the **Ports** tab in VS Code, find port 8000, and click the 🌐 globe icon.
 
 ### 3.4 Stop the Application
 

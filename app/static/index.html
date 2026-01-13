@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Dynatrace AI Chat - Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dt-purple: #612AD5;
+            --dt-purple-dark: #4A1FA8;
+            --dt-purple-light: #7B4FE0;
+            --dt-green: #2AB06F;
+            --dt-blue: #4FD1C5;
+            --dt-gray-100: #F7F8FA;
+            --dt-gray-200: #E8ECF0;
+            --dt-gray-300: #C8D0D9;
+            --dt-gray-600: #6B7280;
+            --dt-gray-800: #1F2937;
+            --dt-gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dt-purple-light), var(--dt-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            color: var(--dt-gray-300);
+            font-size: 0.95rem;
+        }
+
+        .attendee-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(97, 42, 213, 0.2);
+            border: 1px solid rgba(97, 42, 213, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .attendee-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--dt-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Messages Area */
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 500px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--dt-purple), var(--dt-purple-dark));
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, var(--dt-green), #1E8A5A);
+        }
+
+        .message-content {
+            background: rgba(255,255,255,0.08);
+            padding: 14px 18px;
+            border-radius: 16px;
+            max-width: 75%;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--dt-purple), var(--dt-purple-dark));
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-content p {
+            margin: 0;
+        }
+
+        .sources {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: var(--dt-gray-300);
+        }
+
+        .sources-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--dt-blue);
+        }
+
+        .source-item {
+            background: rgba(0,0,0,0.2);
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 4px;
+            font-size: 0.75rem;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--dt-gray-300);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: var(--dt-purple);
+            box-shadow: 0 0 0 3px rgba(97, 42, 213, 0.2);
+        }
+
+        #messageInput::placeholder {
+            color: var(--dt-gray-300);
+        }
+
+        #sendButton {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--dt-purple), var(--dt-purple-dark));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(97, 42, 213, 0.4);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Options Row */
+        .options-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+            padding-left: 4px;
+        }
+
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--dt-gray-300);
+            cursor: pointer;
+        }
+
+        .toggle-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--dt-purple);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .quick-actions-title {
+            font-size: 0.8rem;
+            color: var(--dt-gray-300);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 14px;
+            background: rgba(97, 42, 213, 0.15);
+            border: 1px solid rgba(97, 42, 213, 0.3);
+            color: var(--dt-purple-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(97, 42, 213, 0.25);
+            border-color: var(--dt-purple);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--dt-gray-300);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-dot.connected { background: var(--dt-green); }
+        .status-dot.disconnected { background: #EF4444; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--dt-gray-300);
+        }
+
+        .empty-state .emoji {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h3 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            background: var(--dt-gray-800);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.error {
+            border-left: 3px solid #EF4444;
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--dt-green);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Scrollbar */
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.5rem; }
+            .message-content { max-width: 85%; }
+            .quick-buttons { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>🤖 Dynatrace AI Chat</h1>
+            <p class="subtitle">AI Observability Workshop - RAG-Powered Assistant</p>
+            <div class="attendee-badge">
+                <span class="dot"></span>
+                <span>Attendee: <strong id="attendeeId">Loading...</strong></span>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="quick-actions">
+                <div class="quick-actions-title">💡 Try asking about:</div>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="sendQuickMessage('What is Dynatrace?')">What is Dynatrace?</button>
+                    <button class="quick-btn" onclick="sendQuickMessage('How does OpenTelemetry work?')">OpenTelemetry</button>
+                    <button class="quick-btn" onclick="sendQuickMessage('Explain Grail and DQL')">Grail & DQL</button>
+                    <button class="quick-btn" onclick="sendQuickMessage('What is OpenLLMetry?')">OpenLLMetry</button>
+                </div>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="empty-state" id="emptyState">
+                    <div class="emoji">💬</div>
+                    <h3>Start a conversation!</h3>
+                    <p>Ask questions about Dynatrace, observability, or AI monitoring.</p>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-row">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            placeholder="Type your message here..." 
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button id="sendButton" onclick="sendMessage()">
+                        <span>Send</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="options-row">
+                    <label class="toggle-option">
+                        <input type="checkbox" id="useRag" checked>
+                        <span>Use RAG (Knowledge Base)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot connected" id="statusDot"></span>
+                    <span id="statusText">Connected</span>
+                </div>
+                <div class="status-item">
+                    <span>Service: <strong id="serviceName">ai-chat-service</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const emptyState = document.getElementById('emptyState');
+        const useRagCheckbox = document.getElementById('useRag');
+        const attendeeIdEl = document.getElementById('attendeeId');
+        const serviceNameEl = document.getElementById('serviceName');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        let isLoading = false;
+
+        // Initialize - fetch service info
+        async function init() {
+            try {
+                const response = await fetch('/info');
+                const data = await response.json();
+                attendeeIdEl.textContent = data.attendee_id;
+                serviceNameEl.textContent = data.service_name;
+                statusDot.className = 'status-dot connected';
+                statusText.textContent = 'Connected';
+            } catch (error) {
+                console.error('Failed to fetch service info:', error);
+                statusDot.className = 'status-dot disconnected';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || isLoading) return;
+
+            // Hide empty state
+            emptyState.style.display = 'none';
+
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+            
+            // Show loading
+            isLoading = true;
+            sendButton.disabled = true;
+            const loadingId = showTypingIndicator();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        use_rag: useRagCheckbox.checked
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get response');
+                }
+
+                const data = await response.json();
+                removeTypingIndicator(loadingId);
+                addMessage(data.response, 'assistant', data.sources);
+
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator(loadingId);
+                showToast('Failed to send message. Please try again.', 'error');
+            } finally {
+                isLoading = false;
+                sendButton.disabled = false;
+            }
+        }
+
+        // Quick message button
+        function sendQuickMessage(message) {
+            messageInput.value = message;
+            sendMessage();
+        }
+
+        // Add message to chat
+        function addMessage(content, type, sources = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = type === 'user' ? '👤' : '🤖';
+            
+            let sourcesHtml = '';
+            if (sources && sources.length > 0) {
+                sourcesHtml = `
+                    <div class="sources">
+                        <div class="sources-title">📚 Sources used:</div>
+                        ${sources.map(s => `<div class="source-item">${escapeHtml(s)}</div>`).join('')}
+                    </div>
+                `;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <p>${escapeHtml(content)}</p>
+                    ${sourcesHtml}
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const typingDiv = document.createElement('div');
+            typingDiv.id = id;
+            typingDiv.className = 'message assistant';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return id;
+        }
+
+        // Remove typing indicator
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

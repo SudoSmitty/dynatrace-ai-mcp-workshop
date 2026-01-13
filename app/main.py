@@ -37,6 +37,8 @@ load_dotenv()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import chromadb
@@ -67,6 +69,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files for UI
+import os as os_path
+STATIC_DIR = os_path.join(os_path.dirname(__file__), "static")
+if os_path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Pydantic Models
@@ -229,9 +237,14 @@ async def startup_event():
     """)
     initialize_rag()
 
-@app.get("/", response_model=HealthResponse)
+@app.get("/", response_class=FileResponse)
 async def root():
-    """Root endpoint with service information"""
+    """Serve the chat UI"""
+    return FileResponse(os_path.join(STATIC_DIR, "index.html"))
+
+@app.get("/api/health", response_model=HealthResponse)
+async def api_health():
+    """API Health check with service information"""
     return HealthResponse(
         status="healthy",
         attendee_id=ATTENDEE_ID,

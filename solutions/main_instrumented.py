@@ -45,6 +45,8 @@ else:
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import chromadb
@@ -73,5 +75,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files for UI
+import os as os_path
+STATIC_DIR = os_path.join(os_path.dirname(__file__), "..", "app", "static")
+if os_path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # ... (rest of the application code is identical to main.py)

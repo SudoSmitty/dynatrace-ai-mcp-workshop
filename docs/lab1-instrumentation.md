@@ -188,35 +188,37 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 ## Step 5: Generate Test Traffic
 
-Let's create some traces by using the chat endpoint.
+Let's create some traces by using the chat interface!
 
-### 5.1 Send Chat Requests
+### 5.1 Open the Chat UI
 
-Open a new terminal and send several requests:
+Your application includes a beautiful chat interface. When you start the app, GitHub Codespaces will detect the port and show a popup—click **"Open in Browser"** to access it.
 
-```bash
-# Request 1: Ask about Dynatrace
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What is Dynatrace and what does it do?"}'
+If you miss the popup, you can:
+1. Click the **Ports** tab in the VS Code terminal panel
+2. Find port `8000` and click the globe icon 🌐 to open in browser
 
-# Request 2: Ask about OpenTelemetry
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "How does OpenTelemetry work with Dynatrace?"}'
+### 5.2 Chat with the AI Assistant
 
-# Request 3: Ask about observability
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Explain observability for AI applications"}'
+Use the chat interface to send several messages and generate traces:
 
-# Request 4: Direct LLM call (no RAG)
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Write a haiku about monitoring", "use_rag": false}'
-```
+**Try these example questions:**
+- "What is Dynatrace and what does it do?"
+- "How does OpenTelemetry work with Dynatrace?"
+- "Explain observability for AI applications"
+- "What is the Dynatrace MCP?"
 
-### 5.2 What Gets Traced?
+> **💡 Tip:** The UI has quick-action buttons for common questions. Click them to send pre-written queries!
+
+### 5.3 Toggle RAG Mode
+
+The chat interface includes a toggle for "Use RAG (Knowledge Base)":
+- **✅ Checked:** Uses the vector store to find relevant context before answering
+- **❌ Unchecked:** Sends your question directly to the LLM without context
+
+Try sending the same question with RAG on and off to see the difference!
+
+### 5.4 What Gets Traced?
 
 Each request generates traces for:
 - **HTTP Request** - The incoming FastAPI request
