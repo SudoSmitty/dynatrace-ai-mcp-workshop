@@ -44,10 +44,11 @@ from typing import Optional, List
 import chromadb
 from chromadb.config import Settings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 # Get configuration from environment
 ATTENDEE_ID = os.getenv("ATTENDEE_ID", "workshop-attendee")
@@ -71,9 +72,8 @@ app.add_middleware(
 )
 
 # Mount static files for UI
-import os as os_path
-STATIC_DIR = os_path.join(os_path.dirname(__file__), "static")
-if os_path.exists(STATIC_DIR):
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -157,10 +157,15 @@ SAMPLE_DOCUMENTS = [
 embeddings = None
 vectorstore = None
 qa_chain = None
+retriever = None
+
+def format_docs(docs):
+    """Format retrieved documents into a single string"""
+    return "\n\n".join(doc.page_content for doc in docs)
 
 def initialize_rag():
     """Initialize the RAG components with sample documents"""
-    global embeddings, vectorstore, qa_chain
+    global embeddings, vectorstore, qa_chain, retriever
     
     try:
         # Initialize OpenAI embeddings
@@ -182,6 +187,9 @@ def initialize_rag():
             collection_name=f"workshop_{ATTENDEE_ID}"
         )
         
+        # Create retriever
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+        
         # Initialize LLM
         llm = ChatOpenAI(
             model="gpt-4o-mini",
@@ -189,28 +197,24 @@ def initialize_rag():
         )
         
         # Create prompt template
-        prompt_template = """You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
-        Use the following context to answer the question. If you don't know the answer based on the 
-        context, say so and provide a general helpful response.
-        
-        Context: {context}
-        
-        Question: {question}
-        
-        Answer:"""
-        
-        PROMPT = PromptTemplate(
-            template=prompt_template,
-            input_variables=["context", "question"]
+        prompt = ChatPromptTemplate.from_template(
+            """You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
+            Use the following context to answer the question. If you don't know the answer based on the 
+            context, say so and provide a general helpful response.
+            
+            Context: {context}
+            
+            Question: {question}
+            
+            Answer:"""
         )
         
-        # Create QA chain
-        qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
-            chain_type_kwargs={"prompt": PROMPT},
-            return_source_documents=True
+        # Create RAG chain using LCEL
+        qa_chain = (
+            {"context": retriever | format_docs, "question": RunnablePassthrough()}
+            | prompt
+            | llm
+            | StrOutputParser()
         )
         
         print(f"✅ RAG initialized successfully for attendee: {ATTENDEE_ID}")
@@ -240,7 +244,7 @@ async def startup_event():
 @app.get("/", response_class=FileResponse)
 async def root():
     """Serve the chat UI"""
-    return FileResponse(os_path.join(STATIC_DIR, "index.html"))
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
 @app.get("/api/health", response_model=HealthResponse)
 async def api_health():
@@ -276,10 +280,14 @@ async def chat(request: ChatRequest):
     
     try:
         if request.use_rag and qa_chain:
-            # Use RAG chain
-            result = qa_chain.invoke({"query": request.message})
-            response_text = result["result"]
-            sources = [doc.page_content[:100] + "..." for doc in result.get("source_documents", [])]
+            # Use RAG chain (LCEL returns string directly)
+            response_text = qa_chain.invoke(request.message)
+            # Get sources separately
+            if retriever:
+                source_docs = retriever.invoke(request.message)
+                sources = [doc.page_content[:100] + "..." for doc in source_docs]
+            else:
+                sources = None
         else:
             # Direct LLM call
             llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
