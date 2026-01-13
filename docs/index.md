@@ -8,7 +8,7 @@ nav_order: 1
   <h1>🎯 Dynatrace AI Observability Workshop</h1>
   <p class="hero-subtitle">Master AI/LLM monitoring with Dynatrace and the Model Context Protocol (MCP) in this hands-on workshop</p>
   <div class="hero-buttons">
-    <a href="https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1" class="btn btn-primary">
+    <a href="https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1" class="btn btn-primary">
       🚀 Launch Workshop Environment
     </a>
     <a href="lab0-setup" class="btn btn-secondary">
@@ -72,12 +72,12 @@ By the end of this workshop, you will be able to:
 Click the button below to launch your workshop environment:
 
 <div style="text-align: center; margin: 32px 0;">
-  <a href="https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1">
+  <a href="https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1">
     <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" style="height: 44px;">
   </a>
 </div>
 
-> **Note:** Replace `YOUR_ORG` with your GitHub organization name after forking the repository.
+> **Note:** Each attendee gets their own isolated Codespace environment. Your changes stay local to your Codespace and won't affect other attendees.
 
 ---
 

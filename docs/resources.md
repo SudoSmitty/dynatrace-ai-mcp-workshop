@@ -159,7 +159,7 @@ For this workshop, your Dynatrace API token needs these scopes:
 
 ### GitHub Resources
 
-- [This Workshop Repository](https://github.com/YOUR_ORG/dynatrace-ai-mcp-workshop)
+- [This Workshop Repository](https://github.com/sudosmitty/dynatrace-ai-mcp-workshop)
 - [Dynatrace GitHub](https://github.com/Dynatrace)
 - [OpenLLMetry](https://github.com/traceloop/openllmetry)
 

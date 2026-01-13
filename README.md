@@ -1,6 +1,6 @@
 # 🎯 Dynatrace AI Observability & MCP Workshop
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1)
 
 A hands-on workshop for learning AI/LLM observability with Dynatrace and the Model Context Protocol (MCP).
 
@@ -25,11 +25,13 @@ A hands-on workshop for learning AI/LLM observability with Dynatrace and the Mod
 
 ## 🚀 Quick Start for Attendees
 
+> **Note:** Each attendee gets their own **isolated Codespace environment**. You don't need to fork or clone this repository—just launch a Codespace and your changes stay private to your session.
+
 ### Step 1: Launch Codespace
 
 Click the button above or use:
 ```
-https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1
+https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1
 ```
 
 ### Step 2: Configure Environment
@@ -40,7 +42,7 @@ Edit the `.env` file with:
 
 ### Step 3: Follow the Labs
 
-Open the workshop guide: [Workshop Labs](https://YOUR_ORG.github.io/dynatrace-ai-mcp-workshop)
+Open the workshop guide: [Workshop Labs](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop)
 
 ---
 
@@ -48,10 +50,10 @@ Open the workshop guide: [Workshop Labs](https://YOUR_ORG.github.io/dynatrace-ai
 
 | Lab | Duration | Description |
 |-----|----------|-------------|
-| [Lab 0: Setup](https://YOUR_ORG.github.io/dynatrace-ai-mcp-workshop/lab0-setup.html) | 15 min | Environment configuration |
-| [Lab 1: Instrumentation](https://YOUR_ORG.github.io/dynatrace-ai-mcp-workshop/lab1-instrumentation.html) | 30 min | Add OpenLLMetry to the sample app |
-| [Lab 2: Explore Traces](https://YOUR_ORG.github.io/dynatrace-ai-mcp-workshop/lab2-explore-traces.html) | 45 min | Analyze AI traces in Dynatrace |
-| [Lab 3: Dynatrace MCP](https://YOUR_ORG.github.io/dynatrace-ai-mcp-workshop/lab3-dynatrace-mcp.html) | 45 min | Use MCP for agentic AI |
+| [Lab 0: Setup](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab0-setup.html) | 15 min | Environment configuration |
+| [Lab 1: Instrumentation](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab1-instrumentation.html) | 30 min | Add OpenLLMetry to the sample app |
+| [Lab 2: Explore Traces](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab2-explore-traces.html) | 45 min | Analyze AI traces in Dynatrace |
+| [Lab 3: Dynatrace MCP](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab3-dynatrace-mcp.html) | 45 min | Use MCP for agentic AI |
 
 ---
 
@@ -61,9 +63,7 @@ Open the workshop guide: [Workshop Labs](https://YOUR_ORG.github.io/dynatrace-ai
 ├── .devcontainer/          # GitHub Codespaces configuration
 │   ├── devcontainer.json   # Container settings and extensions
 │   └── setup.sh            # Post-create setup script
-├── .github/
-│   └── workflows/
-│       └── pages.yml       # GitHub Pages deployment
+├── .github/                # GitHub configuration
 ├── app/                    # Sample RAG/LLM application
 │   ├── main.py            # Main application (to be instrumented)
 │   ├── requirements.txt   # Python dependencies
@@ -85,16 +85,20 @@ Open the workshop guide: [Workshop Labs](https://YOUR_ORG.github.io/dynatrace-ai
 
 ### Prerequisites
 
-1. **GitHub Organization** with Codespaces enabled
+1. **GitHub Account** with Codespaces enabled
 2. **Dynatrace Environment** (playground/demo tenant)
 3. **OpenAI API Key** with sufficient quota
 
+### How It Works
+
+> **Attendees share the same repository**—they don't fork it. Each attendee launches their own isolated Codespace, and all their code modifications stay private to that Codespace session.
+
 ### Setup Steps
 
-#### 1. Fork/Clone Repository
+#### 1. Clone Repository (for customization)
 
 ```bash
-git clone https://github.com/YOUR_ORG/dynatrace-ai-mcp-workshop.git
+git clone https://github.com/sudosmitty/dynatrace-ai-mcp-workshop.git
 ```
 
 #### 2. Configure GitHub Secrets
@@ -115,21 +119,13 @@ Create an API token in your Dynatrace tenant with these permissions:
 - `logs.read`
 - `DataExport`
 
-#### 4. Update URLs
-
-Replace `YOUR_ORG` throughout the repository with your GitHub organization name:
-- README.md
-- docs/index.md
-- docs/lab0-setup.md
-- docs/resources.md
-
-#### 5. Enable GitHub Pages
+#### 4. Enable GitHub Pages
 
 1. Go to Settings → Pages
 2. Source: Deploy from a branch
 3. Branch: `main`, folder: `/docs`
 
-#### 6. Prepare Attendee Credentials
+#### 5. Prepare Attendee Credentials
 
 Create a shared document or slide with:
 - `DT_ENDPOINT`: `https://YOUR_ENV.live.dynatrace.com/api/v2/otlp`

@@ -23,15 +23,15 @@ Before starting, ensure you have:
 
 ## Step 1: Launch GitHub Codespace
 
-1. Click the button below or navigate to the repository:
+1. Click the button below to launch your personal workshop environment:
 
-   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1)
+   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1)
 
 2. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
 
 3. Once ready, you'll see VS Code in your browser with the workshop files
 
-   ![Codespace Ready](/assets/images/codespace-ready.png)
+> **💡 Important:** Each attendee gets their own **isolated Codespace**. All your code changes stay within your Codespace and won't affect other workshop participants. No need to fork or create branches!
 
 ---
 
