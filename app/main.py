@@ -158,14 +158,83 @@ embeddings = None
 vectorstore = None
 qa_chain = None
 retriever = None
+llm = None
 
 def format_docs(docs):
     """Format retrieved documents into a single string"""
     return "\n\n".join(doc.page_content for doc in docs)
 
+# ═══════════════════════════════════════════════════════════════════════════
+# RAG Pipeline Functions (Each creates distinct trace spans)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def retrieve_documents(query: str) -> list:
+    """
+    Step 1: Retrieve relevant documents from vector store
+    This generates embedding + vector search spans
+    """
+    if not retriever:
+        return []
+    docs = retriever.invoke(query)
+    return docs
+
+def generate_context(docs: list) -> str:
+    """
+    Step 2: Format retrieved documents into context string
+    """
+    if not docs:
+        return "No relevant context found."
+    return format_docs(docs)
+
+def generate_response(question: str, context: str) -> str:
+    """
+    Step 3: Generate LLM response with context
+    This generates the main LLM completion span
+    """
+    if not llm:
+        raise ValueError("LLM not initialized")
+    
+    prompt = f"""You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
+    Use the following context to answer the question. If you don't know the answer based on the 
+    context, say so and provide a general helpful response.
+    
+    Context: {context}
+    
+    Question: {question}
+    
+    Answer:"""
+    
+    response = llm.invoke(prompt)
+    return response.content
+
+def summarize_sources(docs: list) -> list:
+    """
+    Step 4: Extract and summarize source snippets
+    """
+    if not docs:
+        return []
+    return [doc.page_content[:100] + "..." for doc in docs]
+
+def analyze_query_intent(query: str) -> dict:
+    """
+    Step 5: Quick LLM call to classify query intent
+    This adds an additional LLM span for richer traces
+    """
+    if not llm:
+        return {"intent": "unknown", "confidence": 0}
+    
+    classification_prompt = f"""Classify the following query into one of these categories: 
+    'technical', 'conceptual', 'troubleshooting', 'general'. 
+    Respond with just the category name.
+    
+    Query: {query}"""
+    
+    result = llm.invoke(classification_prompt)
+    return {"intent": result.content.strip().lower(), "query": query}
+
 def initialize_rag():
     """Initialize the RAG components with sample documents"""
-    global embeddings, vectorstore, qa_chain, retriever
+    global embeddings, vectorstore, qa_chain, retriever, llm
     
     try:
         # Initialize OpenAI embeddings
@@ -190,7 +259,7 @@ def initialize_rag():
         # Create retriever
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         
-        # Initialize LLM
+        # Initialize LLM (stored globally for reuse)
         llm = ChatOpenAI(
             model="gpt-4o-mini",
             temperature=0.7
@@ -269,29 +338,36 @@ async def chat(request: ChatRequest):
     """
     Chat endpoint - Process a message using RAG or direct LLM
     
-    This is the main endpoint that will generate traces showing:
-    - LLM calls to OpenAI
-    - Embedding generation
-    - Vector store retrieval
-    - Response generation
+    This endpoint generates multiple trace spans:
+    1. Query intent analysis (LLM call)
+    2. Document retrieval (embedding + vector search)
+    3. Context generation
+    4. Response generation (LLM call)
+    5. Source summarization
     """
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     
     try:
-        if request.use_rag and qa_chain:
-            # Use RAG chain (LCEL returns string directly)
-            response_text = qa_chain.invoke(request.message)
-            # Get sources separately
-            if retriever:
-                source_docs = retriever.invoke(request.message)
-                sources = [doc.page_content[:100] + "..." for doc in source_docs]
-            else:
-                sources = None
+        if request.use_rag and retriever and llm:
+            # Step 1: Analyze query intent (generates LLM span)
+            intent_info = analyze_query_intent(request.message)
+            
+            # Step 2: Retrieve relevant documents (generates embedding + search spans)
+            retrieved_docs = retrieve_documents(request.message)
+            
+            # Step 3: Generate context from documents
+            context = generate_context(retrieved_docs)
+            
+            # Step 4: Generate response with context (generates LLM span)
+            response_text = generate_response(request.message, context)
+            
+            # Step 5: Summarize sources for response
+            sources = summarize_sources(retrieved_docs)
         else:
-            # Direct LLM call
-            llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
-            response = llm.invoke(request.message)
+            # Direct LLM call (single LLM span)
+            direct_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+            response = direct_llm.invoke(request.message)
             response_text = response.content
             sources = None
         
