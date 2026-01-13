@@ -222,9 +222,9 @@ Try sending the same question with RAG on and off to see the difference!
 
 Each request generates traces for:
 - **HTTP Request** - The incoming FastAPI request
-- **Embedding Generation** - OpenAI embeddings for vector search
+- **Embedding Generation** - Azure OpenAI embeddings for vector search
 - **Vector Store Query** - ChromaDB retrieval
-- **LLM Completion** - OpenAI chat completion
+- **LLM Completion** - Azure OpenAI chat completion
 - **Token Usage** - Input/output token counts
 
 ---

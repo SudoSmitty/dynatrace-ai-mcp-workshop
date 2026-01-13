@@ -87,7 +87,7 @@ Open the workshop guide: [Workshop Labs](https://sudosmitty.github.io/dynatrace-
 
 1. **GitHub Account** with Codespaces enabled
 2. **Dynatrace Environment** (playground/demo tenant)
-3. **OpenAI API Key** with sufficient quota
+3. **Azure OpenAI** resource with deployments for chat (gpt-4o-mini) and embeddings (text-embedding-ada-002)
 
 ### How It Works
 
@@ -107,7 +107,8 @@ Add these secrets to the repository (Settings → Secrets → Codespaces):
 
 | Secret | Description |
 |--------|-------------|
-| `OPENAI_API_KEY` | OpenAI API key for all attendees |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint (e.g., https://your-resource.openai.azure.com) |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
 
 #### 3. Create Dynatrace API Token
 
@@ -139,7 +140,7 @@ Create a shared document or slide with:
 
 A RAG (Retrieval Augmented Generation) service built with:
 - **FastAPI** - Web framework
-- **OpenAI** - LLM provider
+- **Azure OpenAI** - LLM provider
 - **LangChain** - Orchestration
 - **ChromaDB** - Vector store
 
@@ -177,7 +178,7 @@ After instrumentation, Dynatrace captures:
 
 ## 🔐 Security Notes
 
-- OpenAI API key is stored in GitHub Secrets (not exposed to attendees)
+- Azure OpenAI credentials are stored in GitHub Secrets (not exposed to attendees)
 - Dynatrace tokens should be rotated after workshops
 - Consider using a dedicated playground tenant
 

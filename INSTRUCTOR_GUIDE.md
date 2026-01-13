@@ -8,8 +8,8 @@ This document provides guidance for instructors running the workshop.
 
 - [ ] Verify Dynatrace playground tenant access
 - [ ] Create API token with required permissions
-- [ ] Test OpenAI API key quota
-- [ ] Configure GitHub Secrets for the repository (OPENAI_API_KEY)
+- [ ] Verify Azure OpenAI resource is provisioned and accessible
+- [ ] Configure GitHub Secrets for the repository (AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY)
 - [ ] Test Codespace creation end-to-end
 - [ ] Prepare attendee credential sharing document
 
@@ -19,7 +19,7 @@ This document provides guidance for instructors running the workshop.
 
 - [ ] Verify Dynatrace tenant is accessible
 - [ ] Test API token is working
-- [ ] Verify OpenAI API has sufficient credits
+- [ ] Verify Azure OpenAI deployments are responding (test endpoint + API key)
 - [ ] Prepare backup credentials if needed
 - [ ] Send reminder to attendees with GitHub account requirements
 
@@ -79,13 +79,14 @@ Create a simple slide or document to share with attendees:
 2. Try a different browser
 3. Have attendee create from repo page directly
 
-### OpenAI Errors
+### Azure OpenAI Errors
 
-**Symptom:** "API key invalid" or rate limiting
+**Symptom:** "API key invalid", "Resource not found", or rate limiting
 **Solution:**
-1. Verify OPENAI_API_KEY secret is set correctly
-2. Check OpenAI usage dashboard for quota
-3. Have backup API key ready
+1. Verify AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY secrets are set correctly
+2. Check Azure OpenAI resource quotas in Azure Portal
+3. Verify deployment names match (gpt-4o-mini, text-embedding-ada-002)
+4. Have backup credentials ready
 
 ### No Traces in Dynatrace
 
@@ -152,9 +153,9 @@ When showing MCP:
 - Focus on instrumentation concepts
 - Show screenshots of expected results
 
-### If OpenAI Unavailable
+### If Azure OpenAI Unavailable
 
-- Have a mock/stub endpoint ready
+- Have a backup Azure OpenAI resource in a different region
 - Focus on instrumentation patterns
 - Can still explain the concepts
 
