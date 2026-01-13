@@ -145,19 +145,20 @@ A RAG (Retrieval Augmented Generation) service built with:
 
 ### Key Features
 
-- Pre-loaded with Dynatrace-related knowledge
-- Unique service naming per attendee (`ai-chat-service-{ATTENDEE_ID}`)
-- Ready for OpenLLMetry instrumentation
+- 🎨 **Beautiful Chat UI** - Interactive web interface for conversations
+- 📚 Pre-loaded with Dynatrace-related knowledge
+- 🏷️ Unique service naming per attendee (`ai-chat-service-{ATTENDEE_ID}`)
+- 🔬 Ready for OpenLLMetry instrumentation
 
 ### Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | Health check |
-| `/health` | GET | Health check |
-| `/chat` | POST | Chat with AI (RAG-enabled) |
-| `/documents` | POST | Add documents to knowledge base |
+| `/` | GET | Chat UI (web interface) |
+| `/chat` | POST | Chat API endpoint |
 | `/info` | GET | Service information |
+| `/health` | GET | Health check |
+| `/documents` | POST | Add documents to knowledge base |
 
 ---
 
