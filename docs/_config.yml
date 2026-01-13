@@ -1,11 +1,16 @@
 title: Dynatrace AI Observability Workshop
 description: Hands-on workshop for AI monitoring with Dynatrace and MCP
-baseurl: ""
-url: ""
+baseurl: "/dynatrace-ai-mcp-workshop"
+url: "https://sudosmitty.github.io"
 
 # Build settings
 markdown: kramdown
 highlighter: rouge
+
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
 
 # Exclude from build
 exclude:
@@ -13,6 +18,16 @@ exclude:
   - Gemfile.lock
   - node_modules
   - vendor
+  - README.md
+
+# Include hidden files
+include:
+  - _layouts
+  - _includes
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
 
 # Default front matter
 defaults:
