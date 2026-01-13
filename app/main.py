@@ -43,7 +43,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 import chromadb
 from chromadb.config import Settings
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
@@ -54,6 +54,13 @@ from langchain_core.runnables import RunnablePassthrough
 ATTENDEE_ID = os.getenv("ATTENDEE_ID", "workshop-attendee")
 APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
 APP_PORT = int(os.getenv("APP_PORT", 8000))
+
+# Azure OpenAI Configuration
+AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+AZURE_OPENAI_CHAT_DEPLOYMENT = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o-mini")
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
+AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
 
 # Initialize FastAPI app with attendee-specific naming
 app = FastAPI(
@@ -237,8 +244,13 @@ def initialize_rag():
     global embeddings, vectorstore, qa_chain, retriever, llm
     
     try:
-        # Initialize OpenAI embeddings
-        embeddings = OpenAIEmbeddings()
+        # Initialize Azure OpenAI embeddings
+        embeddings = AzureOpenAIEmbeddings(
+            azure_endpoint=AZURE_OPENAI_ENDPOINT,
+            api_key=AZURE_OPENAI_API_KEY,
+            azure_deployment=AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+            api_version=AZURE_OPENAI_API_VERSION
+        )
         
         # Create text splitter
         text_splitter = RecursiveCharacterTextSplitter(
@@ -259,9 +271,12 @@ def initialize_rag():
         # Create retriever
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         
-        # Initialize LLM (stored globally for reuse)
-        llm = ChatOpenAI(
-            model="gpt-4o-mini",
+        # Initialize Azure OpenAI LLM (stored globally for reuse)
+        llm = AzureChatOpenAI(
+            azure_endpoint=AZURE_OPENAI_ENDPOINT,
+            api_key=AZURE_OPENAI_API_KEY,
+            azure_deployment=AZURE_OPENAI_CHAT_DEPLOYMENT,
+            api_version=AZURE_OPENAI_API_VERSION,
             temperature=0.7
         )
         
@@ -366,7 +381,13 @@ async def chat(request: ChatRequest):
             sources = summarize_sources(retrieved_docs)
         else:
             # Direct LLM call (single LLM span)
-            direct_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+            direct_llm = AzureChatOpenAI(
+                azure_endpoint=AZURE_OPENAI_ENDPOINT,
+                api_key=AZURE_OPENAI_API_KEY,
+                azure_deployment=AZURE_OPENAI_CHAT_DEPLOYMENT,
+                api_version=AZURE_OPENAI_API_VERSION,
+                temperature=0.7
+            )
             response = direct_llm.invoke(request.message)
             response_text = response.content
             sources = None
