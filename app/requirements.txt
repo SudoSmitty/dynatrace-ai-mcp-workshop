@@ -1,0 +1,23 @@
+# Core dependencies
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+python-dotenv==1.0.1
+
+# OpenAI and LangChain for RAG
+openai==1.12.0
+langchain==0.1.9
+langchain-openai==0.0.6
+langchain-community==0.0.24
+
+# Vector store for RAG
+chromadb==0.4.22
+tiktoken==0.6.0
+
+# OpenLLMetry/Traceloop for instrumentation
+# Attendees will uncomment these during the lab
+# traceloop-sdk==0.15.11
+# opentelemetry-exporter-otlp==1.22.0
+
+# Utilities
+pydantic==2.6.1
+httpx==0.26.0

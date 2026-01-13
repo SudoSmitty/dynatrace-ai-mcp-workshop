@@ -1,0 +1,141 @@
+/* Workshop custom styles */
+
+:root {
+  --dt-purple: #6F2DA8;
+  --dt-blue: #00A1E0;
+  --dt-green: #00B74A;
+  --dt-dark: #1A1A2E;
+}
+
+/* Code blocks */
+pre {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+code {
+  background-color: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: var(--dt-purple);
+  color: white;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--dt-purple);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #5a2489;
+  color: white;
+}
+
+/* Callouts */
+blockquote {
+  border-left: 4px solid var(--dt-purple);
+  padding-left: 16px;
+  margin-left: 0;
+  color: #555;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+/* Navigation */
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+nav ul li {
+  margin: 8px 0;
+}
+
+nav ul li a {
+  color: var(--dt-purple);
+  text-decoration: none;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Headers */
+h1, h2, h3 {
+  color: var(--dt-dark);
+}
+
+h1 {
+  border-bottom: 2px solid var(--dt-purple);
+  padding-bottom: 10px;
+}
+
+/* Workshop specific */
+.checkpoint {
+  background-color: #e8f5e9;
+  border: 1px solid var(--dt-green);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.troubleshooting {
+  background-color: #fff3e0;
+  border: 1px solid #ff9800;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+/* Lab navigation */
+.lab-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
