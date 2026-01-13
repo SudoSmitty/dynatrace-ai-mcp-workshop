@@ -385,4 +385,7 @@ Now that you've completed the workshop, consider:
 
 You've successfully completed the Dynatrace AI Observability Workshop! 
 
-[← Back to Home](index.md){: .btn } [View Resources →](resources.md){: .btn .btn-primary }
+<div class="lab-nav">
+  <a href="lab2-explore-traces">← Lab 2: Explore Traces</a>
+  <a href="resources">View Resources →</a>
+</div>

@@ -329,4 +329,7 @@ Check your `.env` file has both:
 
 You've successfully instrumented an AI application for Dynatrace! Now let's explore the traces in the Dynatrace UI.
 
-[➡️ Continue to Lab 2: Explore Traces in Dynatrace](lab2-explore-traces.md){: .btn .btn-primary }
+<div class="lab-nav">
+  <a href="lab0-setup">← Lab 0: Setup</a>
+  <a href="lab2-explore-traces">Lab 2: Explore Traces →</a>
+</div>

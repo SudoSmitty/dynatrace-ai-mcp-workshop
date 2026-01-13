@@ -186,4 +186,7 @@ We'd love to hear your feedback on this workshop! Please share your thoughts wit
 
 ---
 
-[← Back to Workshop Home](index.md){: .btn .btn-primary }
+<div class="lab-nav">
+  <a href="lab3-dynatrace-mcp">← Lab 3: Dynatrace MCP</a>
+  <a href="./">Back to Home →</a>
+</div>

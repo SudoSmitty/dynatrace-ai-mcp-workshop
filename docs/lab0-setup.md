@@ -181,4 +181,7 @@ The OpenAI API key is provided via GitHub Secrets. If you see this error:
 
 Your environment is ready! Let's move on to adding AI observability instrumentation.
 
-[➡️ Continue to Lab 1: AI Instrumentation](lab1-instrumentation.md){: .btn .btn-primary }
+<div class="lab-nav">
+  <a href="./">← Home</a>
+  <a href="lab1-instrumentation">Lab 1: Instrumentation →</a>
+</div>

@@ -4,11 +4,18 @@ title: Home
 nav_order: 1
 ---
 
-# 🎯 Dynatrace AI Observability Workshop
-
-Welcome to the **Dynatrace AI Observability & MCP Workshop**! In this hands-on session, you'll learn how to monitor AI/LLM applications using Dynatrace and leverage the power of Dynatrace MCP for agentic AI workflows.
-
----
+<div class="hero">
+  <h1>🎯 Dynatrace AI Observability Workshop</h1>
+  <p class="hero-subtitle">Master AI/LLM monitoring with Dynatrace and the Model Context Protocol (MCP) in this hands-on workshop</p>
+  <div class="hero-buttons">
+    <a href="https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1" class="btn btn-primary">
+      🚀 Launch Workshop Environment
+    </a>
+    <a href="lab0-setup" class="btn btn-secondary">
+      📖 Start Lab 0
+    </a>
+  </div>
+</div>
 
 ## 📋 Workshop Overview
 
@@ -22,10 +29,12 @@ Welcome to the **Dynatrace AI Observability & MCP Workshop**! In this hands-on s
 
 By the end of this workshop, you will be able to:
 
-1. **Instrument AI applications** with OpenLLMetry/Traceloop for Dynatrace
-2. **Visualize LLM traces** including prompts, completions, and token usage
-3. **Analyze RAG pipelines** with distributed tracing
-4. **Use Dynatrace MCP** to query observability data from your IDE
+| Skill | Description |
+|-------|-------------|
+| **🔬 Instrument AI Applications** | Add OpenLLMetry/Traceloop to Python AI apps |
+| **📊 Visualize LLM Traces** | See prompts, completions, and token usage |
+| **🔍 Analyze RAG Pipelines** | Debug with distributed tracing |
+| **🤖 Use Dynatrace MCP** | Query observability data from your IDE |
 
 ---
 
@@ -33,21 +42,28 @@ By the end of this workshop, you will be able to:
 
 | Time | Lab | Description |
 |------|-----|-------------|
-| 15 min | [Lab 0: Environment Setup](lab0-setup.md) | Configure your GitHub Codespace and environment |
-| 30 min | [Lab 1: AI Instrumentation](lab1-instrumentation.md) | Add OpenLLMetry instrumentation to the sample app |
-| 45 min | [Lab 2: Explore Traces](lab2-explore-traces.md) | Analyze AI traces in Dynatrace |
-| 45 min | [Lab 3: Dynatrace MCP](lab3-dynatrace-mcp.md) | Use MCP for agentic AI observability |
+| 15 min | [Lab 0: Environment Setup](lab0-setup) | Configure your GitHub Codespace |
+| 30 min | [Lab 1: AI Instrumentation](lab1-instrumentation) | Add OpenLLMetry to the sample app |
+| 45 min | [Lab 2: Explore Traces](lab2-explore-traces) | Analyze AI traces in Dynatrace |
+| 45 min | [Lab 3: Dynatrace MCP](lab3-dynatrace-mcp) | Use MCP for agentic AI |
 
 ---
 
 ## 🛠️ What's Included
 
-This workshop provides:
-
-- ✅ **Pre-configured GitHub Codespace** with all dependencies
-- ✅ **Sample RAG/LLM application** ready for instrumentation
-- ✅ **Access to Dynatrace playground** environment
-- ✅ **Step-by-step lab guides** (you're reading them!)
+<div class="card">
+  <div class="card-header">
+    <span style="font-size: 24px;">📦</span>
+    <strong>Everything You Need</strong>
+  </div>
+  
+  <ul>
+    <li>✅ <strong>Pre-configured GitHub Codespace</strong> with all dependencies</li>
+    <li>✅ <strong>Sample RAG/LLM application</strong> ready for instrumentation</li>
+    <li>✅ <strong>Access to Dynatrace playground</strong> environment</li>
+    <li>✅ <strong>Step-by-step lab guides</strong> (you're reading them!)</li>
+  </ul>
+</div>
 
 ---
 
@@ -55,7 +71,11 @@ This workshop provides:
 
 Click the button below to launch your workshop environment:
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1)
+<div style="text-align: center; margin: 32px 0;">
+  <a href="https://codespaces.new/YOUR_ORG/dynatrace-ai-mcp-workshop?quickstart=1">
+    <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" style="height: 44px;">
+  </a>
+</div>
 
 > **Note:** Replace `YOUR_ORG` with your GitHub organization name after forking the repository.
 
@@ -63,10 +83,15 @@ Click the button below to launch your workshop environment:
 
 ## 📞 Need Help?
 
-- Raise your hand in the workshop
-- Check the [Resources](resources.md) page for documentation links
-- Ask your workshop instructor
+- 🙋 Raise your hand in the workshop
+- 📚 Check the [Resources](resources) page for documentation links
+- 👨‍🏫 Ask your workshop instructor
 
 ---
 
-[➡️ Start with Lab 0: Environment Setup](lab0-setup.md){: .btn .btn-primary }
+<div class="lab-nav">
+  <div></div>
+  <a href="lab0-setup">
+    Start Lab 0 →
+  </a>
+</div>

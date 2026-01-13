@@ -310,4 +310,7 @@ Before proceeding to Lab 3, verify you can:
 
 You've explored AI traces in Dynatrace and understand how to analyze LLM observability data. Now let's learn how to use Dynatrace MCP for agentic AI interactions!
 
-[➡️ Continue to Lab 3: Dynatrace MCP](lab3-dynatrace-mcp.md){: .btn .btn-primary }
+<div class="lab-nav">
+  <a href="lab1-instrumentation">← Lab 1: Instrumentation</a>
+  <a href="lab3-dynatrace-mcp">Lab 3: Dynatrace MCP →</a>
+</div>
