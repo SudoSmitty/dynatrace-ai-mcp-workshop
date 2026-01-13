@@ -1,14 +1,22 @@
 title: Dynatrace AI Observability Workshop
 description: Hands-on workshop for AI monitoring with Dynatrace and MCP
-remote_theme: pages-themes/minimal@v0.2.0
-plugins:
-  - jekyll-remote-theme
+baseurl: ""
+url: ""
 
-# Navigation
-nav:
-  - Home: index.md
-  - Lab 0 - Setup: lab0-setup.md
-  - Lab 1 - Instrumentation: lab1-instrumentation.md
-  - Lab 2 - Explore Traces: lab2-explore-traces.md
-  - Lab 3 - Dynatrace MCP: lab3-dynatrace-mcp.md
-  - Resources: resources.md
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Default front matter
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

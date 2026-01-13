@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#612AD5"/>
+      <stop offset="50%" style="stop-color:#4B1FA8"/>
+      <stop offset="100%" style="stop-color:#3A1580"/>
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00B4E5"/>
+      <stop offset="100%" style="stop-color:#2AB06F"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="1100" cy="100" r="200" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="100" cy="530" r="150" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="900" cy="500" r="100" fill="rgba(255,255,255,0.02)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.05">
+    <line x1="0" y1="150" x2="1200" y2="150" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="450" x2="1200" y2="450" stroke="white" stroke-width="1"/>
+    <line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="900" y1="0" x2="900" y2="630" stroke="white" stroke-width="1"/>
+  </g>
+  
+  <!-- Accent bar -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#accentGradient)"/>
+  
+  <!-- Logo icon -->
+  <g transform="translate(80, 250)">
+    <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="4"/>
+    <circle cx="50" cy="50" r="18" fill="white"/>
+    <path d="M50 15 V30 M50 70 V85 M85 50 H70 M30 50 H15" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Main title -->
+  <text x="200" y="280" fill="white" font-family="Arial, sans-serif" font-size="56" font-weight="bold">
+    AI Observability Workshop
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="340" fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="28">
+    Hands-on Dynatrace + MCP Training
+  </text>
+  
+  <!-- Features -->
+  <g transform="translate(200, 400)">
+    <g transform="translate(0, 0)">
+      <circle cx="15" cy="15" r="15" fill="#2AB06F"/>
+      <text x="15" y="20" fill="white" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">✓</text>
+      <text x="45" y="22" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="18">OpenLLMetry Instrumentation</text>
+    </g>
+    <g transform="translate(350, 0)">
+      <circle cx="15" cy="15" r="15" fill="#2AB06F"/>
+      <text x="15" y="20" fill="white" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">✓</text>
+      <text x="45" y="22" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="18">LLM Trace Analysis</text>
+    </g>
+    <g transform="translate(600, 0)">
+      <circle cx="15" cy="15" r="15" fill="#2AB06F"/>
+      <text x="15" y="20" fill="white" font-family="Arial, sans-serif" font-size="16" text-anchor="middle">✓</text>
+      <text x="45" y="22" fill="rgba(255,255,255,0.9)" font-family="Arial, sans-serif" font-size="18">Dynatrace MCP</text>
+    </g>
+  </g>
+  
+  <!-- Duration badge -->
+  <g transform="translate(950, 50)">
+    <rect x="0" y="0" width="180" height="50" rx="25" fill="rgba(255,255,255,0.15)"/>
+    <text x="90" y="32" fill="white" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" font-weight="bold">⏱ 2-2.5 Hours</text>
+  </g>
+  
+  <!-- Dynatrace branding -->
+  <text x="80" y="580" fill="rgba(255,255,255,0.6)" font-family="Arial, sans-serif" font-size="16">Powered by</text>
+  <text x="180" y="580" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Dynatrace</text>
+</svg>

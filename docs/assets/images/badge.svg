@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#612AD5"/>
+      <stop offset="100%" style="stop-color:#4B1FA8"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="100%" style="stop-color:#FFA500"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="url(#goldGrad)" stroke-width="4"/>
+  
+  <!-- Main background -->
+  <circle cx="100" cy="100" r="88" fill="url(#bgGrad)"/>
+  
+  <!-- Inner decorative ring -->
+  <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+  
+  <!-- Observability icon -->
+  <circle cx="100" cy="80" r="20" fill="none" stroke="white" stroke-width="3"/>
+  <circle cx="100" cy="80" r="8" fill="white"/>
+  <path d="M100 55 L100 65 M100 95 L100 105 M125 80 L115 80 M85 80 L75 80" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Star accent -->
+  <path d="M100 115 L103 125 L113 125 L105 131 L108 141 L100 135 L92 141 L95 131 L87 125 L97 125 Z" fill="url(#goldGrad)"/>
+  
+  <!-- Text -->
+  <text x="100" y="165" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">AI OBSERVABILITY</text>
+  <text x="100" y="180" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-family="Arial, sans-serif" font-size="9">WORKSHOP COMPLETE</text>
+</svg>

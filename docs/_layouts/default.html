@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }} | {{ site.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <link rel="icon" type="image/svg+xml" href="{{ '/assets/images/favicon.svg' | relative_url }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="{{ '/' | relative_url }}" class="logo">
+                <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="16" cy="16" r="6" fill="currentColor"/>
+                    <path d="M16 6V10M16 22V26M26 16H22M10 16H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="logo-text">AI Observability Workshop</span>
+            </a>
+            <nav class="header-nav">
+                <a href="https://www.dynatrace.com" target="_blank" rel="noopener" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    Dynatrace
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Workshop Labs</h3>
+                    <ul class="sidebar-nav">
+                        <li>
+                            <a href="{{ '/' | relative_url }}" class="sidebar-link {% if page.url == '/' or page.url == '/index.html' %}active{% endif %}">
+                                <span class="sidebar-icon">🏠</span>
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ '/lab0-setup' | relative_url }}" class="sidebar-link {% if page.url contains 'lab0' %}active{% endif %}">
+                                <span class="sidebar-icon">⚙️</span>
+                                Lab 0: Setup
+                                <span class="sidebar-time">15 min</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ '/lab1-instrumentation' | relative_url }}" class="sidebar-link {% if page.url contains 'lab1' %}active{% endif %}">
+                                <span class="sidebar-icon">🔬</span>
+                                Lab 1: Instrumentation
+                                <span class="sidebar-time">30 min</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ '/lab2-explore-traces' | relative_url }}" class="sidebar-link {% if page.url contains 'lab2' %}active{% endif %}">
+                                <span class="sidebar-icon">🔍</span>
+                                Lab 2: Explore Traces
+                                <span class="sidebar-time">45 min</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ '/lab3-dynatrace-mcp' | relative_url }}" class="sidebar-link {% if page.url contains 'lab3' %}active{% endif %}">
+                                <span class="sidebar-icon">🤖</span>
+                                Lab 3: Dynatrace MCP
+                                <span class="sidebar-time">45 min</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ '/resources' | relative_url }}" class="sidebar-link {% if page.url contains 'resources' %}active{% endif %}">
+                                <span class="sidebar-icon">📚</span>
+                                Resources
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Quick Links</h3>
+                    <ul class="sidebar-nav">
+                        <li>
+                            <a href="https://github.com/YOUR_ORG/dynatrace-ai-mcp-workshop" target="_blank" class="sidebar-link external">
+                                <span class="sidebar-icon">📦</span>
+                                GitHub Repo
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://docs.dynatrace.com" target="_blank" class="sidebar-link external">
+                                <span class="sidebar-icon">📖</span>
+                                Dynatrace Docs
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <article class="content">
+                {{ content }}
+            </article>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p>Built with 💜 by <a href="https://www.dynatrace.com">Dynatrace</a></p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+
+    <script>
+        // Mobile menu toggle
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        toggle?.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>
