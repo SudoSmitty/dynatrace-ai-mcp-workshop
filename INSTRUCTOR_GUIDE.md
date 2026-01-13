@@ -9,9 +9,11 @@ This document provides guidance for instructors running the workshop.
 - [ ] Verify Dynatrace playground tenant access
 - [ ] Create API token with required permissions
 - [ ] Test OpenAI API key quota
-- [ ] Update `YOUR_ORG` placeholders in all files
+- [ ] Configure GitHub Secrets for the repository (OPENAI_API_KEY)
 - [ ] Test Codespace creation end-to-end
 - [ ] Prepare attendee credential sharing document
+
+> **Important:** Attendees share the same repository—they don't fork it. Each attendee launches their own isolated Codespace environment where all code modifications stay private to their session.
 
 ### Day Before
 
