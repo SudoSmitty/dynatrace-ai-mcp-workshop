@@ -15,8 +15,8 @@ tiktoken==0.6.0
 
 # OpenLLMetry/Traceloop for instrumentation
 # Attendees will uncomment these during the lab
-# traceloop-sdk==0.15.11
-# opentelemetry-exporter-otlp==1.22.0
+# traceloop-sdk==0.50.1
+# opentelemetry-exporter-otlp==1.39.1
 
 # Utilities
 pydantic==2.6.1

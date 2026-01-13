@@ -31,12 +31,12 @@ Open `app/requirements.txt` and **uncomment** the following lines (remove the `#
 
 ```python
 # Before (commented out):
-# traceloop-sdk==0.15.11
-# opentelemetry-exporter-otlp==1.22.0
+# traceloop-sdk==0.50.1
+# opentelemetry-exporter-otlp==1.39.1
 
 # After (uncommented):
-traceloop-sdk==0.15.11
-opentelemetry-exporter-otlp==1.22.0
+traceloop-sdk==0.50.1
+opentelemetry-exporter-otlp==1.39.1
 ```
 
 ### 1.2 Install the Dependencies
@@ -49,7 +49,7 @@ pip install traceloop-sdk opentelemetry-exporter-otlp
 
 Expected output:
 ```
-Successfully installed traceloop-sdk-0.15.11 opentelemetry-exporter-otlp-1.22.0 ...
+Successfully installed traceloop-sdk-0.50.1 opentelemetry-exporter-otlp-1.39.1 ...
 ```
 
 ---
