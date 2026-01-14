@@ -59,12 +59,15 @@ az functionapp config appsettings set \
   --resource-group rg-workshop-secrets \
   --settings \
     WORKSHOP_TOKEN="your-unique-workshop-token" \
+    ADMIN_SECRET="your-secure-admin-secret" \
     AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com" \
     AZURE_OPENAI_API_KEY="your-azure-openai-api-key" \
     AZURE_OPENAI_CHAT_DEPLOYMENT="gpt-4o-mini" \
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-ada-002" \
     AZURE_OPENAI_API_VERSION="2024-08-01-preview"
 ```
+
+> **Note:** The `ADMIN_SECRET` is used to authenticate token rotation requests from GitHub Actions. Generate a strong random string.
 
 ## Rotating Workshop Tokens
 
@@ -83,13 +86,27 @@ Add these to repository Settings → Secrets and variables → Actions:
 
 | Type | Name | Description |
 |------|------|-------------|
-| Secret | `AZURE_CLIENT_ID` | Service principal client ID |
-| Secret | `AZURE_TENANT_ID` | Azure AD tenant ID |
-| Secret | `AZURE_SUBSCRIPTION_ID` | Azure subscription ID |
-| Variable | `AZURE_RESOURCE_GROUP` | e.g., `rg-workshop-secrets` |
+| Secret | `ADMIN_SECRET` | Must match the `ADMIN_SECRET` in Azure Function App Settings |
 | Variable | `AZURE_FUNCTION_APP_NAME` | e.g., `workshop-secrets-server` |
 
-### Option B: Azure CLI (Manual)
+> **How it works:** The GitHub Actions workflow calls the `/api/rotate-token` endpoint on the Azure Function, which stores the new token in Azure Blob Storage. No Azure RBAC or service principal required!
+
+### Option B: Direct API Call
+
+You can rotate the token by calling the API directly:
+
+```bash
+curl -X POST https://workshop-secrets-server.azurewebsites.net/api/rotate-token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "admin_secret": "your-admin-secret",
+    "new_token": "dynatrace2026"
+  }'
+```
+
+### Option C: Azure CLI (Initial Setup Only)
+
+For the initial token before the rotate endpoint is available:
 
 ```bash
 # Use a simple, memorable word
@@ -100,6 +117,8 @@ az functionapp config appsettings set \
   --resource-group rg-workshop-secrets \
   --settings WORKSHOP_TOKEN="$NEW_TOKEN"
 ```
+
+> **Note:** Once deployed, the function reads tokens from blob storage first, falling back to the environment variable. Use the API or GitHub Actions for rotation.
 
 ## Local Development
 
@@ -159,10 +178,57 @@ Health check endpoint.
 }
 ```
 
+### POST /api/rotate-token
+
+Rotate the workshop token. Requires admin authentication.
+
+**Request:**
+```json
+{
+  "admin_secret": "your-admin-secret",
+  "new_token": "new-workshop-token"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Workshop token updated successfully"
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+### POST /api/get-token
+
+Get the current workshop token. Requires admin authentication. Useful for instructors to check/share the current token.
+
+**Request:**
+```json
+{
+  "admin_secret": "your-admin-secret"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "token": "current-workshop-token"
+}
+```
+
 ## Security Considerations
 
 - Tokens are compared using constant-time comparison to prevent timing attacks
 - A small delay is added on failed attempts to slow brute-force attacks
 - All credentials are stored in Azure Function App Settings (encrypted at rest)
+- Workshop tokens are stored in Azure Blob Storage (using the function's built-in storage)
+- The `ADMIN_SECRET` protects the token rotation endpoint
 - Rotate the WORKSHOP_TOKEN after each workshop session
 - Consider adding rate limiting via Azure API Management for production use
