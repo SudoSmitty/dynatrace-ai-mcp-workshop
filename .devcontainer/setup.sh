@@ -168,7 +168,9 @@ if [ ! -f "$ENV_FILE" ]; then
 # DYNATRACE CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════════
 # Get these from your instructor or your Dynatrace environment
-# Environment URL format: https://{your-environment-id}.live.dynatrace.com
+#
+# ⚠️  IMPORTANT: The endpoint MUST include /api/v2/otlp at the end!
+# Example: https://abc12345.live.dynatrace.com/api/v2/otlp
 
 DT_ENDPOINT=
 DT_API_TOKEN=

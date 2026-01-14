@@ -6,10 +6,19 @@ DO NOT share this file with attendees until after the lab is complete.
 """
 
 import os
+import warnings
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables FIRST
-load_dotenv()
+# Suppress OpenTelemetry warnings about None attribute values
+warnings.filterwarnings("ignore", message="Invalid type NoneType for attribute")
+
+# Load environment variables from .env file in project root
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+else:
+    load_dotenv()
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  ✅ SOLUTION: Dynatrace OpenLLMetry Instrumentation                      ║

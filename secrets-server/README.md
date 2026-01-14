@@ -134,9 +134,9 @@ Request credentials with a workshop token.
 {
   "azure_openai_endpoint": "https://...",
   "azure_openai_api_key": "...",
-  "azure_openai_chat_deployment": "gpt-4o-mini",
-  "azure_openai_embedding_deployment": "text-embedding-ada-002",
-  "azure_openai_api_version": "2024-08-01-preview"
+  "azure_openai_chat_deployment": "gpt-4o",
+  "azure_openai_embedding_deployment": "dynatrace-ai-agent",
+  "azure_openai_api_version": "2024-11-20"
 }
 ```
 

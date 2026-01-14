@@ -14,10 +14,20 @@ This is a simple AI-powered Q&A service that uses:
 """
 
 import os
+import warnings
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Suppress OpenTelemetry warnings about None attribute values (from tracing libraries)
+warnings.filterwarnings("ignore", message="Invalid type NoneType for attribute")
+
+# Load environment variables from .env file in project root
+# (handles both running from app/ directory and from project root)
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+else:
+    load_dotenv()  # Fall back to default behavior
 
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  🔬 LAB 1: INSTRUMENTATION SECTION                                        ║
