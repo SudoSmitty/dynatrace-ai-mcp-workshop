@@ -25,6 +25,7 @@ warnings.filterwarnings("ignore", message="Invalid type NoneType for attribute")
 # (handles both running from app/ directory and from project root)
 env_path = Path(__file__).parent.parent / ".env"
 if env_path.exists():
+    
     load_dotenv(env_path)
 else:
     load_dotenv()  # Fall back to default behavior
@@ -185,6 +186,17 @@ def format_docs(docs):
 # RAG Pipeline Functions (Each creates distinct trace spans)
 # ═══════════════════════════════════════════════════════════════════════════
 
+# Import Traceloop decorators for creating trace hierarchies
+try:
+    from traceloop.sdk.decorators import workflow, task
+    TRACELOOP_AVAILABLE = True
+except ImportError:
+    TRACELOOP_AVAILABLE = False
+    # Define no-op decorators if Traceloop not available
+    def workflow(name): return lambda f: f
+    def task(name): return lambda f: f
+
+@task(name="retrieve_documents")
 def retrieve_documents(query: str) -> list:
     """
     Step 1: Retrieve relevant documents from vector store
@@ -195,6 +207,7 @@ def retrieve_documents(query: str) -> list:
     docs = retriever.invoke(query)
     return docs
 
+@task(name="generate_context")
 def generate_context(docs: list) -> str:
     """
     Step 2: Format retrieved documents into context string
@@ -203,6 +216,7 @@ def generate_context(docs: list) -> str:
         return "No relevant context found."
     return format_docs(docs)
 
+@task(name="generate_response")
 def generate_response(question: str, context: str) -> str:
     """
     Step 3: Generate LLM response with context
@@ -211,17 +225,21 @@ def generate_response(question: str, context: str) -> str:
     if not llm:
         raise ValueError("LLM not initialized")
     
-    prompt = f"""You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
-    Use the following context to answer the question. If you don't know the answer based on the 
-    context, say so and provide a general helpful response.
+    # Use chat messages format for cleaner trace capture
+    from langchain_core.messages import SystemMessage, HumanMessage
     
-    Context: {context}
+    system_prompt = f"""You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
+Use the following context to answer the question. If you don't know the answer based on the 
+context, say so and provide a general helpful response.
+
+Context: {context}"""
     
-    Question: {question}
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=question)
+    ]
     
-    Answer:"""
-    
-    response = llm.invoke(prompt)
+    response = llm.invoke(messages)
     return response.content
 
 def summarize_sources(docs: list) -> list:
@@ -232,6 +250,7 @@ def summarize_sources(docs: list) -> list:
         return []
     return [doc.page_content[:100] + "..." for doc in docs]
 
+@task(name="analyze_query_intent")
 def analyze_query_intent(query: str) -> dict:
     """
     Step 5: Quick LLM call to classify query intent
@@ -240,13 +259,16 @@ def analyze_query_intent(query: str) -> dict:
     if not llm:
         return {"intent": "unknown", "confidence": 0}
     
+    # Use messages format for consistent trace capture
+    from langchain_core.messages import HumanMessage
+    
     classification_prompt = f"""Classify the following query into one of these categories: 
     'technical', 'conceptual', 'troubleshooting', 'general'. 
     Respond with just the category name.
     
     Query: {query}"""
     
-    result = llm.invoke(classification_prompt)
+    result = llm.invoke([HumanMessage(content=classification_prompt)])
     return {"intent": result.content.strip().lower(), "query": query}
 
 def initialize_rag():
@@ -358,6 +380,29 @@ async def health_check():
         service_name=f"ai-chat-service-{ATTENDEE_ID}"
     )
 
+@workflow(name="rag_chat_pipeline")
+def process_rag_chat(message: str) -> tuple:
+    """
+    RAG Chat Pipeline - Groups all LLM calls under a single parent trace
+    """
+    # Step 1: Analyze query intent (generates LLM span)
+    intent_info = analyze_query_intent(message)
+    
+    # Step 2: Retrieve relevant documents (generates embedding + search spans)
+    retrieved_docs = retrieve_documents(message)
+    
+    # Step 3: Generate context from documents
+    context = generate_context(retrieved_docs)
+    
+    # Step 4: Generate response with context (generates LLM span)
+    response_text = generate_response(message, context)
+    
+    # Step 5: Summarize sources for response
+    sources = summarize_sources(retrieved_docs)
+    
+    return response_text, sources
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """
@@ -373,22 +418,21 @@ async def chat(request: ChatRequest):
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     
+    # Add user's original question as a trace attribute for better visibility in Dynatrace
+    # This captures the actual user input separately from the full RAG prompt
+    try:
+        from traceloop.sdk import Traceloop
+        Traceloop.set_association_properties({
+            "user.question": request.message,
+            "use_rag": str(request.use_rag)
+        })
+    except Exception:
+        pass  # Traceloop not initialized, skip
+    
     try:
         if request.use_rag and retriever and llm:
-            # Step 1: Analyze query intent (generates LLM span)
-            intent_info = analyze_query_intent(request.message)
-            
-            # Step 2: Retrieve relevant documents (generates embedding + search spans)
-            retrieved_docs = retrieve_documents(request.message)
-            
-            # Step 3: Generate context from documents
-            context = generate_context(retrieved_docs)
-            
-            # Step 4: Generate response with context (generates LLM span)
-            response_text = generate_response(request.message, context)
-            
-            # Step 5: Summarize sources for response
-            sources = summarize_sources(retrieved_docs)
+            # Use the workflow-decorated function to group all operations
+            response_text, sources = process_rag_chat(request.message)
         else:
             # Direct LLM call (single LLM span)
             direct_llm = AzureChatOpenAI(
