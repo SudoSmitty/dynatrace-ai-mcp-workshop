@@ -1,204 +1,219 @@
-# 🎯 Dynatrace AI Observability & MCP Workshop
+# Workshop Secrets Server
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1)
+An Azure Function that securely distributes Azure OpenAI credentials to workshop attendees using a rotating workshop token.
 
-A hands-on workshop for learning AI/LLM observability with Dynatrace and the Model Context Protocol (MCP).
+## How It Works
 
----
+1. Instructor deploys this Azure Function and configures secrets as App Settings
+2. Instructor generates a workshop token for each session
+3. Attendees enter the workshop token when starting their Codespace
+4. The Codespace setup script fetches credentials from this function
+5. Credentials are stored locally in the attendee's `.env` file
 
-## 📋 Workshop Overview
-
-| **Duration** | 2 - 2.5 hours |
-|--------------|---------------|
-| **Level** | Intermediate |
-| **Format** | Hands-on Labs |
-| **Platform** | GitHub Codespaces |
-
-### What You'll Learn
-
-- ✅ Instrument AI/LLM applications with OpenLLMetry
-- ✅ Send traces to Dynatrace via OTLP
-- ✅ Analyze LLM performance, token usage, and costs
-- ✅ Use Dynatrace MCP for agentic AI workflows
-
----
-
-## 🚀 Quick Start for Attendees
-
-> **Note:** Each attendee gets their own **isolated Codespace environment**. You don't need to fork or clone this repository—just launch a Codespace and your changes stay private to your session.
-
-### Step 1: Launch Codespace
-
-Click the button above or use:
-```
-https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1
-```
-
-### Step 2: Configure Environment
-
-Edit the `.env` file with:
-- Your unique `ATTENDEE_ID` (your initials or name)
-- `DT_ENDPOINT` and `DT_API_TOKEN` (provided by instructor)
-
-### Step 3: Follow the Labs
-
-Open the workshop guide: [Workshop Labs](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop)
-
----
-
-## 📚 Workshop Labs
-
-| Lab | Duration | Description |
-|-----|----------|-------------|
-| [Lab 0: Setup](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab0-setup.html) | 15 min | Environment configuration |
-| [Lab 1: Instrumentation](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab1-instrumentation.html) | 30 min | Add OpenLLMetry to the sample app |
-| [Lab 2: Explore Traces](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab2-explore-traces.html) | 45 min | Analyze AI traces in Dynatrace |
-| [Lab 3: Dynatrace MCP](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab3-dynatrace-mcp.html) | 45 min | Use MCP for agentic AI |
-
----
-
-## 🏗️ Repository Structure
-
-```
-├── .devcontainer/          # GitHub Codespaces configuration
-│   ├── devcontainer.json   # Container settings and extensions
-│   └── setup.sh            # Post-create setup script
-├── .github/                # GitHub configuration
-├── app/                    # Sample RAG/LLM application
-│   ├── main.py            # Main application (to be instrumented)
-│   ├── requirements.txt   # Python dependencies
-│   └── .env.template      # Environment template
-├── docs/                   # GitHub Pages workshop guide
-│   ├── index.md           # Workshop home
-│   ├── lab0-setup.md      # Lab 0: Environment setup
-│   ├── lab1-instrumentation.md  # Lab 1: Add instrumentation
-│   ├── lab2-explore-traces.md   # Lab 2: Analyze in Dynatrace
-│   ├── lab3-dynatrace-mcp.md    # Lab 3: Use MCP
-│   └── resources.md       # Reference links
-├── solutions/              # Solution files (instructor only)
-└── README.md              # This file
-```
-
----
-
-## 👨‍🏫 Instructor Setup
+## Deployment
 
 ### Prerequisites
 
-1. **GitHub Account** with Codespaces enabled
-2. **Dynatrace Environment** (playground/demo tenant)
-3. **Azure OpenAI** resource with deployments for chat (gpt-4o-mini) and embeddings (text-embedding-ada-002)
+- Azure CLI installed and logged in
+- Azure Functions Core Tools (optional, for local testing)
 
-### How It Works
-
-> **Attendees share the same repository**—they don't fork it. Each attendee launches their own isolated Codespace, and all their code modifications stay private to that Codespace session.
-
-### Setup Steps
-
-#### 1. Clone Repository (for customization)
+### Quick Deploy
 
 ```bash
-git clone https://github.com/sudosmitty/dynatrace-ai-mcp-workshop.git
-```
-
-#### 2. Deploy the Secrets Server
-
-The workshop uses an Azure Function to securely distribute Azure OpenAI credentials. See [secrets-server/README.md](secrets-server/README.md) for detailed deployment instructions.
-
-Quick setup:
-```bash
-cd secrets-server
+# Login to Azure
 az login
+
+# Create resource group (if needed)
+az group create --name rg-workshop-secrets --location eastus
+
+# Create storage account (required for Azure Functions)
+az storage account create \
+  --name stworkshopsecrets \
+  --resource-group rg-workshop-secrets \
+  --location eastus \
+  --sku Standard_LRS
+
+# Create Function App
+az functionapp create \
+  --name workshop-secrets-server \
+  --resource-group rg-workshop-secrets \
+  --storage-account stworkshopsecrets \
+  --consumption-plan-location eastus \
+  --runtime python \
+  --runtime-version 3.11 \
+  --functions-version 4 \
+  --os-type linux
+
+# Deploy the function
+cd secrets-server
 func azure functionapp publish workshop-secrets-server
 ```
 
-Then configure the app settings with your Azure OpenAI credentials and generate a workshop token.
+### Configure App Settings
 
-#### 3. Create Dynatrace API Token
+After deployment, configure the secrets in Azure Portal or via CLI:
 
-Create an API token in your Dynatrace tenant with these permissions:
-- `openTelemetryTrace.ingest`
-- `metrics.ingest`
-- `entities.read`
-- `problems.read`
-- `logs.read`
-- `DataExport`
+```bash
+az functionapp config appsettings set \
+  --name workshop-secrets-server \
+  --resource-group rg-workshop-secrets \
+  --settings \
+    ADMIN_SECRET="your-secure-admin-secret" \
+    AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com" \
+    AZURE_OPENAI_API_KEY="your-azure-openai-api-key" \
+    AZURE_OPENAI_CHAT_DEPLOYMENT="gpt-4o-mini" \
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-ada-002" \
+    AZURE_OPENAI_API_VERSION="2024-08-01-preview"
+```
 
-#### 4. Enable GitHub Pages
+> **Note:** The `ADMIN_SECRET` is used to authenticate token rotation requests. Generate a strong random string.
+> 
+> **Important:** The workshop token is NOT set here. After deployment, run the "Rotate Workshop Token" GitHub Action to set the initial token.
 
-1. Go to Settings → Pages
-2. Source: Deploy from a branch
-3. Branch: `main`, folder: `/docs`
+## Rotating Workshop Tokens
 
-#### 5. Prepare Attendee Credentials
+### Option A: GitHub Actions (Recommended)
 
-Create a shared document or slide with:
-- `WORKSHOP_TOKEN`: The token configured in the secrets server (for Azure OpenAI credentials)
-- `DT_ENDPOINT`: `https://YOUR_ENV.live.dynatrace.com/api/v2/otlp`
-- `DT_API_TOKEN`: The Dynatrace API token created above
+Use the **"Rotate Workshop Token"** workflow in the repository:
 
----
+1. Go to **Actions** → **Rotate Workshop Token**
+2. Click **Run workflow**
+3. Enter a custom token (e.g., `dynatrace2026`) or leave empty to auto-generate
+4. View the summary to get the new token
 
-## 🔧 The Sample Application
+**Required Setup (one-time):**
 
-### Overview
+Add these to repository Settings → Secrets and variables → Actions:
 
-A RAG (Retrieval Augmented Generation) service built with:
-- **FastAPI** - Web framework
-- **Azure OpenAI** - LLM provider
-- **LangChain** - Orchestration
-- **ChromaDB** - Vector store
+| Type | Name | Description |
+|------|------|-------------|
+| Secret | `ADMIN_SECRET` | Must match the `ADMIN_SECRET` in Azure Function App Settings |
+| Variable | `AZURE_FUNCTION_APP_NAME` | e.g., `workshop-secrets-server` |
 
-### Key Features
+> **How it works:** The GitHub Actions workflow calls the `/api/rotate-token` endpoint on the Azure Function, which stores the new token in Azure Blob Storage. No Azure RBAC or service principal required!
 
-- 🎨 **Beautiful Chat UI** - Interactive web interface for conversations
-- 📚 Pre-loaded with Dynatrace-related knowledge
-- 🏷️ Unique service naming per attendee (`ai-chat-service-{ATTENDEE_ID}`)
-- 🔬 Ready for OpenLLMetry instrumentation
+### Option B: Direct API Call
 
-### Endpoints
+You can rotate the token by calling the API directly:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Chat UI (web interface) |
-| `/chat` | POST | Chat API endpoint |
-| `/info` | GET | Service information |
-| `/health` | GET | Health check |
-| `/documents` | POST | Add documents to knowledge base |
+```bash
+curl -X POST https://workshop-secrets-server.azurewebsites.net/api/rotate-token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "admin_secret": "your-admin-secret",
+    "new_token": "dynatrace2026"
+  }'
+```
 
----
+## Local Development
 
-## 📊 What Gets Traced
+1. Install Azure Functions Core Tools
+2. Update `local.settings.json` with your test values
+3. Run locally:
+   ```bash
+   func start
+   ```
+4. Test the endpoint:
+   ```bash
+   curl -X POST http://localhost:7071/api/get-credentials \
+     -H "Content-Type: application/json" \
+     -d '{"workshop_token": "your-test-token"}'
+   ```
 
-After instrumentation, Dynatrace captures:
+## API Endpoints
 
-| Span Type | Data Captured |
-|-----------|---------------|
-| HTTP Requests | Endpoint, status, duration |
-| Embeddings | Model, token count, latency |
-| Vector Search | Query count, results |
-| LLM Completion | Model, tokens, prompt/response |
+### POST /api/get-credentials
 
----
+Request credentials with a workshop token.
 
-## 🔐 Security Notes
+**Request:**
+```json
+{
+  "workshop_token": "instructor-provided-token"
+}
+```
 
-- Azure OpenAI credentials are distributed via a secure secrets server with rotating workshop tokens
-- Attendees never see the raw Azure OpenAI API key—it's fetched automatically
-- Workshop tokens should be rotated after each workshop session
-- Dynatrace tokens should be rotated after workshops
-- Consider using a dedicated playground tenant
+**Success Response (200):**
+```json
+{
+  "azure_openai_endpoint": "https://...",
+  "azure_openai_api_key": "...",
+  "azure_openai_chat_deployment": "gpt-4o",
+  "azure_openai_embedding_deployment": "dynatrace-ai-agent",
+  "azure_openai_api_version": "2024-11-20"
+}
+```
 
----
+**Error Response (401):**
+```json
+{
+  "error": "Invalid workshop token. Please check with your instructor."
+}
+```
 
-## 📝 License
+### GET /api/health
 
-This workshop is provided for educational purposes. See [LICENSE](LICENSE) for details.
+Health check endpoint.
 
----
+**Response (200):**
+```json
+{
+  "status": "healthy",
+  "service": "workshop-secrets-server"
+}
+```
 
-## 🙏 Acknowledgments
+### POST /api/rotate-token
 
-- [OpenLLMetry / Traceloop](https://github.com/traceloop/openllmetry)
-- [Dynatrace](https://www.dynatrace.com)
-- [OpenTelemetry](https://opentelemetry.io)
+Rotate the workshop token. Requires admin authentication.
+
+**Request:**
+```json
+{
+  "admin_secret": "your-admin-secret",
+  "new_token": "new-workshop-token"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Workshop token updated successfully"
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+### POST /api/get-token
+
+Get the current workshop token. Requires admin authentication. Useful for instructors to check/share the current token.
+
+**Request:**
+```json
+{
+  "admin_secret": "your-admin-secret"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "token": "current-workshop-token"
+}
+```
+
+## Security Considerations
+
+- Tokens are compared using constant-time comparison to prevent timing attacks
+- A small delay is added on failed attempts to slow brute-force attacks
+- Azure OpenAI credentials are stored in Azure Function App Settings (encrypted at rest)
+- Workshop tokens are stored in Azure Blob Storage (using the function's built-in storage account)
+- The `ADMIN_SECRET` protects the token rotation and retrieval endpoints
+- Rotate the workshop token after each workshop session using the GitHub Action or API
+- Consider adding rate limiting via Azure API Management for production use
