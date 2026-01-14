@@ -4,6 +4,7 @@ Azure Function for securely distributing workshop credentials
 
 This function validates a workshop token and returns Azure OpenAI credentials.
 Instructors configure the token and credentials as Azure Function App Settings.
+The workshop token can be rotated via the /api/rotate-token endpoint.
 """
 
 import azure.functions as func
@@ -12,8 +13,62 @@ import logging
 import os
 import hashlib
 import time
+from azure.storage.blob import BlobServiceClient
 
 app = func.FunctionApp()
+
+# Blob storage configuration
+CONTAINER_NAME = "workshop-config"
+TOKEN_BLOB_NAME = "workshop-token.txt"
+
+
+def get_blob_client():
+    """Get Azure Blob client for token storage."""
+    connection_string = os.environ.get("AzureWebJobsStorage")
+    if not connection_string:
+        return None
+    blob_service = BlobServiceClient.from_connection_string(connection_string)
+    container_client = blob_service.get_container_client(CONTAINER_NAME)
+    
+    # Create container if it doesn't exist
+    try:
+        container_client.create_container()
+    except Exception:
+        pass  # Container already exists
+    
+    return container_client.get_blob_client(TOKEN_BLOB_NAME)
+
+
+def get_workshop_token() -> str:
+    """
+    Get the workshop token. First checks blob storage, falls back to env var.
+    """
+    # Try to get from blob storage first
+    try:
+        blob_client = get_blob_client()
+        if blob_client and blob_client.exists():
+            token = blob_client.download_blob().readall().decode("utf-8").strip()
+            if token:
+                return token
+    except Exception as e:
+        logging.warning(f"Could not read token from blob storage: {e}")
+    
+    # Fall back to environment variable
+    return (os.environ.get("WORKSHOP_TOKEN") or "").strip()
+
+
+def set_workshop_token(token: str) -> bool:
+    """
+    Store the workshop token in blob storage.
+    """
+    try:
+        blob_client = get_blob_client()
+        if blob_client:
+            blob_client.upload_blob(token.encode("utf-8"), overwrite=True)
+            return True
+    except Exception as e:
+        logging.error(f"Could not write token to blob storage: {e}")
+    return False
 
 
 def constant_time_compare(val1: str, val2: str) -> bool:
@@ -54,8 +109,10 @@ def get_credentials(req: func.HttpRequest) -> func.HttpResponse:
     """
     logging.info("Secrets request received")
     
-    # Get configuration from App Settings (strip whitespace to handle copy/paste issues)
-    valid_token = (os.environ.get("WORKSHOP_TOKEN") or "").strip()
+    # Get workshop token (from blob storage or env var)
+    valid_token = get_workshop_token()
+    
+    # Get Azure OpenAI configuration from App Settings (strip whitespace to handle copy/paste issues)
     azure_openai_endpoint = (os.environ.get("AZURE_OPENAI_ENDPOINT") or "").strip()
     azure_openai_api_key = (os.environ.get("AZURE_OPENAI_API_KEY") or "").strip().replace("\n", "").replace("\r", "")
     azure_openai_chat_deployment = (os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT") or "gpt-4o-mini").strip()
@@ -125,6 +182,133 @@ def health_check(req: func.HttpRequest) -> func.HttpResponse:
     """
     return func.HttpResponse(
         json.dumps({"status": "healthy", "service": "workshop-secrets-server"}),
+        status_code=200,
+        mimetype="application/json"
+    )
+
+
+@app.route(route="rotate-token", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def rotate_token(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Rotate the workshop token. Requires admin secret for authentication.
+    
+    Request body:
+    {
+        "admin_secret": "the-admin-secret",
+        "new_token": "the-new-workshop-token"
+    }
+    
+    Response (success):
+    {
+        "success": true,
+        "message": "Workshop token updated successfully"
+    }
+    """
+    logging.info("Token rotation request received")
+    
+    # Get admin secret from environment
+    admin_secret = (os.environ.get("ADMIN_SECRET") or "").strip()
+    
+    if not admin_secret:
+        logging.error("ADMIN_SECRET not configured in App Settings")
+        return func.HttpResponse(
+            json.dumps({"error": "Server configuration error. ADMIN_SECRET not set."}),
+            status_code=500,
+            mimetype="application/json"
+        )
+    
+    # Parse request
+    try:
+        req_body = req.get_json()
+        provided_secret = req_body.get("admin_secret", "")
+        new_token = req_body.get("new_token", "").strip()
+    except (ValueError, AttributeError):
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid request body. Expected JSON with 'admin_secret' and 'new_token'."}),
+            status_code=400,
+            mimetype="application/json"
+        )
+    
+    # Validate admin secret
+    if not provided_secret or not constant_time_compare(provided_secret, admin_secret):
+        logging.warning("Invalid admin secret attempt for token rotation")
+        time.sleep(1)  # Delay to prevent brute force
+        return func.HttpResponse(
+            json.dumps({"error": "Unauthorized"}),
+            status_code=401,
+            mimetype="application/json"
+        )
+    
+    # Validate new token
+    if not new_token or len(new_token) < 4:
+        return func.HttpResponse(
+            json.dumps({"error": "New token must be at least 4 characters"}),
+            status_code=400,
+            mimetype="application/json"
+        )
+    
+    # Store the new token
+    if set_workshop_token(new_token):
+        logging.info("Workshop token rotated successfully")
+        return func.HttpResponse(
+            json.dumps({
+                "success": True,
+                "message": "Workshop token updated successfully"
+            }),
+            status_code=200,
+            mimetype="application/json"
+        )
+    else:
+        return func.HttpResponse(
+            json.dumps({"error": "Failed to store new token. Check storage configuration."}),
+            status_code=500,
+            mimetype="application/json"
+        )
+
+
+@app.route(route="get-token", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def get_current_token(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get the current workshop token. Requires admin secret for authentication.
+    Useful for instructors to check/share the current token.
+    
+    Request body:
+    {
+        "admin_secret": "the-admin-secret"
+    }
+    """
+    logging.info("Get token request received")
+    
+    admin_secret = (os.environ.get("ADMIN_SECRET") or "").strip()
+    
+    if not admin_secret:
+        return func.HttpResponse(
+            json.dumps({"error": "ADMIN_SECRET not configured"}),
+            status_code=500,
+            mimetype="application/json"
+        )
+    
+    try:
+        req_body = req.get_json()
+        provided_secret = req_body.get("admin_secret", "")
+    except (ValueError, AttributeError):
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid request body"}),
+            status_code=400,
+            mimetype="application/json"
+        )
+    
+    if not provided_secret or not constant_time_compare(provided_secret, admin_secret):
+        time.sleep(1)
+        return func.HttpResponse(
+            json.dumps({"error": "Unauthorized"}),
+            status_code=401,
+            mimetype="application/json"
+        )
+    
+    current_token = get_workshop_token()
+    return func.HttpResponse(
+        json.dumps({"token": current_token}),
         status_code=200,
         mimetype="application/json"
     )

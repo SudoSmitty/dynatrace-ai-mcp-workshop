@@ -13,42 +13,29 @@ on:
         type: boolean
         default: true
 
-env:
-  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
-  AZURE_FUNCTION_APP_NAME: ${{ vars.AZURE_FUNCTION_APP_NAME }}
-
 jobs:
   rotate-token:
     name: Rotate Workshop Token
     runs-on: ubuntu-latest
     
     permissions:
-      id-token: write  # Required for OIDC authentication
       contents: read
     
     steps:
       - name: Validate Configuration
         run: |
-          if [ -z "${{ vars.AZURE_RESOURCE_GROUP }}" ]; then
-            echo "❌ Error: AZURE_RESOURCE_GROUP variable is not set"
-            echo "Please set it in Settings → Secrets and variables → Actions → Variables"
-            exit 1
-          fi
           if [ -z "${{ vars.AZURE_FUNCTION_APP_NAME }}" ]; then
             echo "❌ Error: AZURE_FUNCTION_APP_NAME variable is not set"
             echo "Please set it in Settings → Secrets and variables → Actions → Variables"
             exit 1
           fi
+          if [ -z "${{ secrets.ADMIN_SECRET }}" ]; then
+            echo "❌ Error: ADMIN_SECRET secret is not set"
+            echo "This must match the ADMIN_SECRET configured in the Azure Function App Settings"
+            exit 1
+          fi
           echo "✅ Configuration validated"
-          echo "   Resource Group: ${{ vars.AZURE_RESOURCE_GROUP }}"
           echo "   Function App: ${{ vars.AZURE_FUNCTION_APP_NAME }}"
-
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Generate or Use Provided Token
         id: token
@@ -70,30 +57,42 @@ jobs:
           echo "token=${NEW_TOKEN}" >> $GITHUB_OUTPUT
           echo "::add-mask::${NEW_TOKEN}"
 
-      - name: Update Azure Function App Setting
+      - name: Rotate Token via Function API
         run: |
-          echo "🔄 Updating workshop token on Azure Function..."
+          echo "🔄 Rotating workshop token via Azure Function API..."
           
-          az functionapp config appsettings set \
-            --name ${{ vars.AZURE_FUNCTION_APP_NAME }} \
-            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
-            --settings WORKSHOP_TOKEN="${{ steps.token.outputs.token }}" \
-            --output none
+          FUNCTION_APP="${{ vars.AZURE_FUNCTION_APP_NAME }}"
+          FUNCTION_URL="https://${FUNCTION_APP}.azurewebsites.net/api/rotate-token"
           
-          echo "✅ Workshop token updated successfully!"
+          HTTP_CODE=$(curl -s -o /tmp/response.txt -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d '{
+              "admin_secret": "${{ secrets.ADMIN_SECRET }}",
+              "new_token": "${{ steps.token.outputs.token }}"
+            }' \
+            "${FUNCTION_URL}")
+          
+          RESPONSE=$(cat /tmp/response.txt)
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Workshop token rotated successfully!"
+            echo "$RESPONSE"
+          else
+            echo "❌ Failed to rotate token. HTTP code: $HTTP_CODE"
+            echo "$RESPONSE"
+            exit 1
+          fi
 
       - name: Verify Update
         run: |
           echo "🔍 Verifying the update..."
           
-          # Get the function app URL
-          FUNCTION_URL=$(az functionapp show \
-            --name ${{ vars.AZURE_FUNCTION_APP_NAME }} \
-            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
-            --query "defaultHostName" -o tsv)
+          FUNCTION_APP="${{ vars.AZURE_FUNCTION_APP_NAME }}"
+          FUNCTION_URL="https://${FUNCTION_APP}.azurewebsites.net"
           
           # Test health endpoint
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://${FUNCTION_URL}/api/health")
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${FUNCTION_URL}/api/health")
           
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✅ Function app is healthy and responding"
@@ -119,7 +118,6 @@ jobs:
           echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Function App | \`${{ vars.AZURE_FUNCTION_APP_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Resource Group | \`${{ vars.AZURE_RESOURCE_GROUP }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Updated | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📋 Share with Attendees" >> $GITHUB_STEP_SUMMARY
