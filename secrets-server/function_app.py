@@ -41,9 +41,9 @@ def get_blob_client():
 
 def get_workshop_token() -> str:
     """
-    Get the workshop token. First checks blob storage, falls back to env var.
+    Get the workshop token from blob storage.
+    Returns empty string if not set.
     """
-    # Try to get from blob storage first
     try:
         blob_client = get_blob_client()
         if blob_client and blob_client.exists():
@@ -53,8 +53,7 @@ def get_workshop_token() -> str:
     except Exception as e:
         logging.warning(f"Could not read token from blob storage: {e}")
     
-    # Fall back to environment variable
-    return (os.environ.get("WORKSHOP_TOKEN") or "").strip()
+    return ""
 
 
 def set_workshop_token(token: str) -> bool:
@@ -109,7 +108,7 @@ def get_credentials(req: func.HttpRequest) -> func.HttpResponse:
     """
     logging.info("Secrets request received")
     
-    # Get workshop token (from blob storage or env var)
+    # Get workshop token from blob storage
     valid_token = get_workshop_token()
     
     # Get Azure OpenAI configuration from App Settings (strip whitespace to handle copy/paste issues)
@@ -121,9 +120,9 @@ def get_credentials(req: func.HttpRequest) -> func.HttpResponse:
     
     # Validate configuration
     if not valid_token:
-        logging.error("WORKSHOP_TOKEN not configured in App Settings")
+        logging.error("Workshop token not set. Use /api/rotate-token to set one.")
         return func.HttpResponse(
-            json.dumps({"error": "Server configuration error. Contact instructor."}),
+            json.dumps({"error": "Workshop token not configured. Instructor needs to run the 'Rotate Workshop Token' GitHub Action."}),
             status_code=500,
             mimetype="application/json"
         )

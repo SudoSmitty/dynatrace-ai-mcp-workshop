@@ -58,7 +58,6 @@ az functionapp config appsettings set \
   --name workshop-secrets-server \
   --resource-group rg-workshop-secrets \
   --settings \
-    WORKSHOP_TOKEN="your-unique-workshop-token" \
     ADMIN_SECRET="your-secure-admin-secret" \
     AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com" \
     AZURE_OPENAI_API_KEY="your-azure-openai-api-key" \
@@ -67,7 +66,9 @@ az functionapp config appsettings set \
     AZURE_OPENAI_API_VERSION="2024-08-01-preview"
 ```
 
-> **Note:** The `ADMIN_SECRET` is used to authenticate token rotation requests from GitHub Actions. Generate a strong random string.
+> **Note:** The `ADMIN_SECRET` is used to authenticate token rotation requests. Generate a strong random string.
+> 
+> **Important:** The workshop token is NOT set here. After deployment, run the "Rotate Workshop Token" GitHub Action to set the initial token.
 
 ## Rotating Workshop Tokens
 
@@ -103,22 +104,6 @@ curl -X POST https://workshop-secrets-server.azurewebsites.net/api/rotate-token 
     "new_token": "dynatrace2026"
   }'
 ```
-
-### Option C: Azure CLI (Initial Setup Only)
-
-For the initial token before the rotate endpoint is available:
-
-```bash
-# Use a simple, memorable word
-NEW_TOKEN="dynatrace2026"
-
-az functionapp config appsettings set \
-  --name workshop-secrets-server \
-  --resource-group rg-workshop-secrets \
-  --settings WORKSHOP_TOKEN="$NEW_TOKEN"
-```
-
-> **Note:** Once deployed, the function reads tokens from blob storage first, falling back to the environment variable. Use the API or GitHub Actions for rotation.
 
 ## Local Development
 
@@ -227,8 +212,8 @@ Get the current workshop token. Requires admin authentication. Useful for instru
 
 - Tokens are compared using constant-time comparison to prevent timing attacks
 - A small delay is added on failed attempts to slow brute-force attacks
-- All credentials are stored in Azure Function App Settings (encrypted at rest)
-- Workshop tokens are stored in Azure Blob Storage (using the function's built-in storage)
-- The `ADMIN_SECRET` protects the token rotation endpoint
-- Rotate the WORKSHOP_TOKEN after each workshop session
+- Azure OpenAI credentials are stored in Azure Function App Settings (encrypted at rest)
+- Workshop tokens are stored in Azure Blob Storage (using the function's built-in storage account)
+- The `ADMIN_SECRET` protects the token rotation and retrieval endpoints
+- Rotate the workshop token after each workshop session using the GitHub Action or API
 - Consider adding rate limiting via Azure API Management for production use
