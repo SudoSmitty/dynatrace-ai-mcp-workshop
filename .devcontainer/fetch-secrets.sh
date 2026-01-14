@@ -20,9 +20,29 @@ add_secret_to_bashrc() {
     echo "export ${var_name}=\"${var_value}\"" >> "$BASHRC_FILE"
 }
 
-echo "🔐 Fetching Azure OpenAI credentials..."
+echo "🔐 Workshop Credentials Setup"
 echo ""
 
+# Prompt for attendee ID
+current_attendee="${ATTENDEE_ID:-}"
+read -p "Enter your attendee ID (e.g., your initials) [${current_attendee:-press enter to generate}]: " input_attendee
+
+if [ -n "$input_attendee" ]; then
+    ATTENDEE_ID="$input_attendee"
+elif [ -z "$current_attendee" ]; then
+    RANDOM_ID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
+    ATTENDEE_ID="attendee-${RANDOM_ID}"
+else
+    ATTENDEE_ID="$current_attendee"
+fi
+
+# Set attendee ID
+export ATTENDEE_ID
+add_secret_to_bashrc "ATTENDEE_ID" "$ATTENDEE_ID"
+echo "✅ Attendee ID: $ATTENDEE_ID"
+echo ""
+
+# Prompt for workshop token
 read -p "Enter your workshop token: " WORKSHOP_TOKEN
 
 if [ -z "$WORKSHOP_TOKEN" ]; then

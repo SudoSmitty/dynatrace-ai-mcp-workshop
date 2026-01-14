@@ -27,29 +27,55 @@ Before starting, ensure you have:
 
    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1)
 
-2. **You'll be prompted for two things:**
-   - **Attendee ID** - Enter your initials or a unique identifier (e.g., `jsmith`, `user01`)
-   - **Workshop Token** - Your instructor will share this (e.g., `dynatrace2026`)
+2. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
 
-3. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
-
-4. Once ready, you'll see VS Code in your browser with the workshop files
+3. Once ready, you'll see VS Code in your browser with the workshop files
 
 > **💡 Important:** Each attendee gets their own **isolated Codespace**. All your code changes stay within your Codespace and won't affect other workshop participants. No need to fork or create branches!
 
 ---
 
-## Step 2: Configure Dynatrace Credentials
+## Step 2: Configure Workshop Credentials
 
-Your Attendee ID and Azure OpenAI credentials were configured automatically during Codespace creation. They're stored securely as environment variables (not visible in files). You just need to add your Dynatrace credentials.
+After the Codespace starts, you'll see a message asking you to configure your credentials.
 
-### 2.1 Open the Environment File
+### 2.1 Run the Setup Script
+
+Open a terminal in VS Code (`Ctrl+`` ` or `Cmd+`` `) and run:
+
+```bash
+bash .devcontainer/fetch-secrets.sh
+```
+
+### 2.2 Enter Your Credentials
+
+You'll be prompted for:
+1. **Attendee ID** - Enter your initials (e.g., `jsmith`) or press Enter to auto-generate
+2. **Workshop Token** - Your instructor will provide this
+
+```
+🔐 Workshop Credentials Setup
+
+Enter your attendee ID (e.g., your name or initials, no spaces) [press enter to generate]: jsmith
+✅ Attendee ID: jsmith
+
+Enter your workshop token: dynatrace2026
+✅ Azure OpenAI credentials configured!
+```
+
+---
+
+## Step 3: Configure Dynatrace Credentials
+
+Your Attendee ID and Azure OpenAI credentials are now configured as environment variables. You just need to add your Dynatrace credentials.
+
+### 3.1 Open the Environment File
 
 1. In the VS Code Explorer, locate and open the `.env` file in the root directory
 
 2. You'll see it only contains placeholders for Dynatrace credentials
 
-### 2.2 Add Dynatrace Credentials
+### 3.2 Add Dynatrace Credentials
 
 Your instructor will provide the following values. Enter them in your `.env` file:
 
@@ -59,7 +85,7 @@ DT_ENDPOINT=https://YOUR_ENV.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYY
 ```
 
-### 2.3 Verify Configuration
+### 3.3 Verify Configuration
 
 Your complete `.env` file should look like this:
 
@@ -69,7 +95,7 @@ DT_ENDPOINT=https://abc12345.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.EXAMPLE_TOKEN_HERE
 ```
 
-> **ℹ️ Note:** Azure OpenAI credentials and your Attendee ID are automatically available as environment variables. You won't see them in the `.env` file - this is by design for security.
+> **ℹ️ Note:** Azure OpenAI credentials and your Attendee ID are stored as environment variables (not in the `.env` file) for security.
 
 To verify your environment variables are set, run in the terminal:
 

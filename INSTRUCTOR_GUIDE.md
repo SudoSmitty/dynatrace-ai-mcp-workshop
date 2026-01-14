@@ -143,17 +143,21 @@ The workshop uses a security-first approach to credential distribution:
 
 ### What Attendees See
 
-1. **During Codespace creation:** Prompted for `ATTENDEE_ID` and `WORKSHOP_TOKEN`
-2. **In `.env` file:** Only Dynatrace credentials (which they need to enter manually)
-3. **Azure OpenAI credentials:** Hidden from view
+1. **Codespace starts** - No prompts during creation (cleaner UX)
+2. **Terminal shows prompt** - Asks them to run `fetch-secrets.sh`
+3. **Interactive setup** - They enter attendee ID and workshop token (visible, not masked)
+4. **In `.env` file:** Only Dynatrace credentials (which they need to enter manually)
+5. **Azure OpenAI credentials:** Hidden in `~/.bashrc`
 
 ### How It Works Internally
 
 1. When the Codespace starts, `setup.sh` runs
-2. It fetches Azure OpenAI credentials from the secrets server using the workshop token
-3. Credentials are exported directly to `~/.bashrc` as environment variables
-4. No intermediate files are created - secrets exist only in memory and bashrc
-5. Python's `os.getenv()` reads these environment variables seamlessly
+2. It generates a random attendee ID and shows a prompt to run `fetch-secrets.sh`
+3. Attendee runs `fetch-secrets.sh` which prompts for ID and workshop token
+4. Script fetches Azure OpenAI credentials from the secrets server
+5. Credentials are exported directly to `~/.bashrc` as environment variables
+6. No intermediate files are created - secrets exist only in memory and bashrc
+7. Python's `os.getenv()` reads these environment variables seamlessly
 
 ### Why This Approach?
 
@@ -192,14 +196,17 @@ Create a simple slide or document to share with attendees:
 ║          Dynatrace AI Workshop - Credentials                  ║
 ╠═══════════════════════════════════════════════════════════════╣
 ║                                                               ║
-║  When creating your Codespace, you'll be prompted for:        ║
+║  After your Codespace starts, run this command:               ║
 ║                                                               ║
-║  ATTENDEE ID:  (use your initials, e.g., jsmith)             ║
-║  WORKSHOP TOKEN:  dynatrace2026                               ║
+║    bash .devcontainer/fetch-secrets.sh                        ║
+║                                                               ║
+║  You'll be prompted for:                                      ║
+║    • Attendee ID: (your initials, e.g., jsmith)              ║
+║    • Workshop Token: dynatrace2026                            ║
 ║                                                               ║
 ║  ─────────────────────────────────────────────────────────────║
 ║                                                               ║
-║  After Codespace starts, add to your .env file:               ║
+║  Then add to your .env file:                                  ║
 ║                                                               ║
 ║  DT_ENDPOINT:                                                 ║
 ║  https://abc12345.live.dynatrace.com/api/v2/otlp             ║
@@ -217,7 +224,7 @@ Create a simple slide or document to share with attendees:
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
-> **Tip:** The workshop token should be a simple, memorable word. Both the Attendee ID and Workshop Token are entered when attendees create their Codespace—they won't need to edit these values manually.
+> **Tip:** The workshop token is visible when attendees type it (not masked), making it easier to verify they entered it correctly.
 
 ---
 

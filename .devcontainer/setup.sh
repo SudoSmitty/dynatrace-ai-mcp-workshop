@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+# Note: No 'set -e' - we want to continue even if some steps fail
 
 echo "🚀 Setting up Dynatrace AI Observability Workshop Environment..."
 
@@ -67,16 +67,25 @@ fetch_workshop_secrets() {
             echo "✅ Azure OpenAI credentials configured!"
             return 0
         else
-            echo "❌ Failed to parse credentials from response"
-            return 1
+            echo ""
+            echo "❌ Failed to parse credentials from server response."
+            echo "   Run 'bash .devcontainer/fetch-secrets.sh' to try again."
+            echo ""
+            return 0  # Don't fail Codespace setup
         fi
     elif [ "$http_code" = "401" ]; then
-        echo "❌ Invalid workshop token. Please check with your instructor."
-        return 1
+        echo ""
+        echo "❌ Invalid workshop token - the token you entered was not recognized."
+        echo "   Please verify the token with your instructor and run:"
+        echo "   bash .devcontainer/fetch-secrets.sh"
+        echo ""
+        return 0  # Don't fail Codespace setup
     else
-        echo "❌ Failed to fetch credentials (HTTP $http_code)"
-        echo "   Response: $body"
-        return 1
+        echo ""
+        echo "❌ Could not reach secrets server (HTTP $http_code)"
+        echo "   Run 'bash .devcontainer/fetch-secrets.sh' to try again."
+        echo ""
+        return 0  # Don't fail Codespace setup
     fi
 }
 
@@ -89,26 +98,36 @@ pip install -r /workspaces/dynatrace-ai-mcp-workshop/app/requirements.txt
 # Set up hidden secrets file (sourced by shell, not visible in .env)
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Set ATTENDEE_ID from Codespaces secret or generate one
+# Set ATTENDEE_ID from environment or generate one
 if [ -n "$ATTENDEE_ID" ]; then
     export ATTENDEE_ID="${ATTENDEE_ID}"
     add_secret_to_bashrc "ATTENDEE_ID" "${ATTENDEE_ID}"
     echo "✅ Using attendee ID: ${ATTENDEE_ID}"
 else
-    # Generate a random ID if not provided
+    # Generate a random ID - attendee can change it later
     RANDOM_ID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
     export ATTENDEE_ID="attendee-${RANDOM_ID}"
     add_secret_to_bashrc "ATTENDEE_ID" "attendee-${RANDOM_ID}"
-    echo "✨ Generated unique attendee ID: attendee-${RANDOM_ID}"
+    echo "✨ Generated attendee ID: attendee-${RANDOM_ID}"
 fi
 
-# Fetch Azure OpenAI credentials using workshop token
+# Check for workshop token - if not set, guide user to configure
 if [ -n "$WORKSHOP_TOKEN" ]; then
-    fetch_workshop_secrets "$WORKSHOP_TOKEN"
+    echo "🔑 Workshop token received (length: ${#WORKSHOP_TOKEN} chars)"
+    fetch_workshop_secrets "$WORKSHOP_TOKEN" || true
 else
     echo ""
-    echo "⚠️  No workshop token found."
-    echo "   If you skipped the token prompt, run: bash .devcontainer/fetch-secrets.sh"
+    echo "╔══════════════════════════════════════════════════════════════════╗"
+    echo "║  📋 ACTION REQUIRED: Configure Workshop Credentials              ║"
+    echo "╠══════════════════════════════════════════════════════════════════╣"
+    echo "║                                                                  ║"
+    echo "║  Run this command to set up your Azure OpenAI credentials:      ║"
+    echo "║                                                                  ║"
+    echo "║    bash .devcontainer/fetch-secrets.sh                          ║"
+    echo "║                                                                  ║"
+    echo "║  Your instructor will provide the workshop token.               ║"
+    echo "║                                                                  ║"
+    echo "╚══════════════════════════════════════════════════════════════════╝"
     echo ""
 fi
 
