@@ -101,14 +101,18 @@ Open the workshop guide: [Workshop Labs](https://sudosmitty.github.io/dynatrace-
 git clone https://github.com/sudosmitty/dynatrace-ai-mcp-workshop.git
 ```
 
-#### 2. Configure GitHub Secrets
+#### 2. Deploy the Secrets Server
 
-Add these secrets to the repository (Settings → Secrets → Codespaces):
+The workshop uses an Azure Function to securely distribute Azure OpenAI credentials. See [secrets-server/README.md](secrets-server/README.md) for detailed deployment instructions.
 
-| Secret | Description |
-|--------|-------------|
-| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint (e.g., https://your-resource.openai.azure.com) |
-| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
+Quick setup:
+```bash
+cd secrets-server
+az login
+func azure functionapp publish workshop-secrets-server
+```
+
+Then configure the app settings with your Azure OpenAI credentials and generate a workshop token.
 
 #### 3. Create Dynatrace API Token
 
@@ -129,8 +133,9 @@ Create an API token in your Dynatrace tenant with these permissions:
 #### 5. Prepare Attendee Credentials
 
 Create a shared document or slide with:
+- `WORKSHOP_TOKEN`: The token configured in the secrets server (for Azure OpenAI credentials)
 - `DT_ENDPOINT`: `https://YOUR_ENV.live.dynatrace.com/api/v2/otlp`
-- `DT_API_TOKEN`: The token created above
+- `DT_API_TOKEN`: The Dynatrace API token created above
 
 ---
 
@@ -178,7 +183,9 @@ After instrumentation, Dynatrace captures:
 
 ## 🔐 Security Notes
 
-- Azure OpenAI credentials are stored in GitHub Secrets (not exposed to attendees)
+- Azure OpenAI credentials are distributed via a secure secrets server with rotating workshop tokens
+- Attendees never see the raw Azure OpenAI API key—it's fetched automatically
+- Workshop tokens should be rotated after each workshop session
 - Dynatrace tokens should be rotated after workshops
 - Consider using a dedicated playground tenant
 

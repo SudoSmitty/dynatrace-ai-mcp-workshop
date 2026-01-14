@@ -29,7 +29,9 @@ Before starting, ensure you have:
 
 2. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
 
-3. Once ready, you'll see VS Code in your browser with the workshop files
+3. **You'll be prompted for a workshop token.** Your instructor will share a simple word or phrase (like `dynatrace2026`). Enter it in the prompt.
+
+4. Once ready, you'll see VS Code in your browser with the workshop files
 
 > **💡 Important:** Each attendee gets their own **isolated Codespace**. All your code changes stay within your Codespace and won't affect other workshop participants. No need to fork or create branches!
 
@@ -37,18 +39,26 @@ Before starting, ensure you have:
 
 ## Step 2: Configure Your Environment
 
-### 2.1 Open the Environment File
+### 2.1 Verify Azure OpenAI Credentials
+
+During Codespace setup, you should have entered the workshop token. Verify your `.env` file has Azure OpenAI credentials:
 
 1. In the VS Code Explorer, locate and open the `.env` file in the root directory
 
-2. If no `.env` file exists, copy from the template:
+2. Look for these lines (added automatically):
    ```bash
-   cp app/.env.template .env
+   AZURE_OPENAI_ENDPOINT=https://...
+   AZURE_OPENAI_API_KEY=...
+   ```
+
+3. If you don't see them, run this command to re-fetch credentials:
+   ```bash
+   bash .devcontainer/fetch-secrets.sh
    ```
 
 ### 2.2 Set Your Attendee ID
 
-Replace the placeholder with your initials or a unique identifier:
+Find and replace the `ATTENDEE_ID` placeholder with your initials or a unique identifier:
 
 ```bash
 # Example: Use your initials or name
@@ -78,6 +88,13 @@ ATTENDEE_ID=jsmith
 # Dynatrace Configuration
 DT_ENDPOINT=https://abc12345.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.EXAMPLE_TOKEN_HERE
+
+# Azure OpenAI Configuration (fetched from secrets server)
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
+AZURE_OPENAI_API_KEY=your-key-here
+AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-ada-002
+AZURE_OPENAI_API_VERSION=2024-08-01-preview
 
 # App Configuration (leave as default)
 APP_HOST=0.0.0.0
@@ -141,6 +158,7 @@ Before proceeding to Lab 1, verify:
 - [ ] Your Codespace is running
 - [ ] The `.env` file is configured with your `ATTENDEE_ID`
 - [ ] The `.env` file has the `DT_ENDPOINT` and `DT_API_TOKEN` from your instructor
+- [ ] The `.env` file has `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_KEY` (fetched via workshop token)
 - [ ] The sample application starts without errors
 - [ ] You can access the application in your browser
 - [ ] The chat endpoint responds with AI-generated text
@@ -149,11 +167,19 @@ Before proceeding to Lab 1, verify:
 
 ## 🆘 Troubleshooting
 
-### "OPENAI_API_KEY not set"
+### "Azure OpenAI credentials not found"
 
-The OpenAI API key is provided via GitHub Secrets. If you see this error:
-1. Make sure you're using the official workshop repository
-2. Contact your instructor - they may need to add the secret
+If you missed entering the workshop token during setup:
+1. Get the workshop token from your instructor
+2. Run: `bash .devcontainer/fetch-secrets.sh`
+3. Enter the workshop token when prompted
+4. Verify your `.env` file now has the Azure OpenAI credentials
+
+### "Invalid workshop token"
+
+1. Double-check you've copied the token correctly from your instructor
+2. Make sure there are no extra spaces
+3. Ask your instructor to verify the token is correct
 
 ### "Connection refused" on port 8000
 

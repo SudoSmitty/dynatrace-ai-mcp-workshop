@@ -25,16 +25,9 @@
     }
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
-  "containerEnv": {
-    "AZURE_OPENAI_ENDPOINT": "${localEnv:AZURE_OPENAI_ENDPOINT}",
-    "AZURE_OPENAI_API_KEY": "${localEnv:AZURE_OPENAI_API_KEY}"
-  },
   "secrets": {
-    "AZURE_OPENAI_ENDPOINT": {
-      "description": "Azure OpenAI endpoint URL (e.g., https://your-resource.openai.azure.com)"
-    },
-    "AZURE_OPENAI_API_KEY": {
-      "description": "Azure OpenAI API key"
+    "WORKSHOP_TOKEN": {
+      "description": "Workshop token provided by your instructor (e.g., 'dynatrace2026')"
     }
   },
   "forwardPorts": [8000],
