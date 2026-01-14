@@ -54,13 +54,13 @@ def get_credentials(req: func.HttpRequest) -> func.HttpResponse:
     """
     logging.info("Secrets request received")
     
-    # Get configuration from App Settings
-    valid_token = os.environ.get("WORKSHOP_TOKEN")
-    azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-    azure_openai_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
-    azure_openai_chat_deployment = os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o-mini")
-    azure_openai_embedding_deployment = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
-    azure_openai_api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
+    # Get configuration from App Settings (strip whitespace to handle copy/paste issues)
+    valid_token = (os.environ.get("WORKSHOP_TOKEN") or "").strip()
+    azure_openai_endpoint = (os.environ.get("AZURE_OPENAI_ENDPOINT") or "").strip()
+    azure_openai_api_key = (os.environ.get("AZURE_OPENAI_API_KEY") or "").strip().replace("\n", "").replace("\r", "")
+    azure_openai_chat_deployment = (os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT") or "gpt-4o-mini").strip()
+    azure_openai_embedding_deployment = (os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") or "text-embedding-ada-002").strip()
+    azure_openai_api_version = (os.environ.get("AZURE_OPENAI_API_VERSION") or "2024-08-01-preview").strip()
     
     # Validate configuration
     if not valid_token:

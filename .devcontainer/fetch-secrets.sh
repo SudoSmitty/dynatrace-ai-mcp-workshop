@@ -8,6 +8,12 @@
 SECRETS_SERVER_URL="${SECRETS_SERVER_URL:-https://workshop-secrets-server.azurewebsites.net/api}"
 BASHRC_FILE="$HOME/.bashrc"
 
+# Ensure jq is installed for JSON parsing
+if ! command -v jq &> /dev/null; then
+    echo "📦 Installing jq for JSON parsing..."
+    sudo apt-get update -qq && sudo apt-get install -y -qq jq > /dev/null 2>&1
+fi
+
 # Function to add a secret to bashrc (avoiding duplicates)
 add_secret_to_bashrc() {
     local var_name="$1"
@@ -60,12 +66,22 @@ http_code=$(echo "$response" | tail -n1)
 body=$(echo "$response" | sed '$d')
 
 if [ "$http_code" = "200" ]; then
-    # Parse JSON response
-    azure_openai_endpoint=$(echo "$body" | grep -o '"azure_openai_endpoint":"[^"]*"' | cut -d'"' -f4)
-    azure_openai_api_key=$(echo "$body" | grep -o '"azure_openai_api_key":"[^"]*"' | cut -d'"' -f4)
-    azure_openai_chat_deployment=$(echo "$body" | grep -o '"azure_openai_chat_deployment":"[^"]*"' | cut -d'"' -f4)
-    azure_openai_embedding_deployment=$(echo "$body" | grep -o '"azure_openai_embedding_deployment":"[^"]*"' | cut -d'"' -f4)
-    azure_openai_api_version=$(echo "$body" | grep -o '"azure_openai_api_version":"[^"]*"' | cut -d'"' -f4)
+    # Parse JSON response using jq if available, otherwise fall back to sed
+    if command -v jq &> /dev/null; then
+        azure_openai_endpoint=$(echo "$body" | jq -r '.azure_openai_endpoint // empty')
+        azure_openai_api_key=$(echo "$body" | jq -r '.azure_openai_api_key // empty')
+        azure_openai_chat_deployment=$(echo "$body" | jq -r '.azure_openai_chat_deployment // empty')
+        azure_openai_embedding_deployment=$(echo "$body" | jq -r '.azure_openai_embedding_deployment // empty')
+        azure_openai_api_version=$(echo "$body" | jq -r '.azure_openai_api_version // empty')
+    else
+        # Fallback: use sed (less reliable)
+        body_clean=$(echo "$body" | tr -d '\n\r')
+        azure_openai_endpoint=$(echo "$body_clean" | sed -n 's/.*"azure_openai_endpoint": *"\([^"]*\)".*/\1/p')
+        azure_openai_api_key=$(echo "$body_clean" | sed -n 's/.*"azure_openai_api_key": *"\([^"]*\)".*/\1/p')
+        azure_openai_chat_deployment=$(echo "$body_clean" | sed -n 's/.*"azure_openai_chat_deployment": *"\([^"]*\)".*/\1/p')
+        azure_openai_embedding_deployment=$(echo "$body_clean" | sed -n 's/.*"azure_openai_embedding_deployment": *"\([^"]*\)".*/\1/p')
+        azure_openai_api_version=$(echo "$body_clean" | sed -n 's/.*"azure_openai_api_version": *"\([^"]*\)".*/\1/p')
+    fi
     
     if [ -n "$azure_openai_endpoint" ] && [ -n "$azure_openai_api_key" ]; then
         # Export to current shell
