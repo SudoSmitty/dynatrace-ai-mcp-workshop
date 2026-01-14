@@ -4,16 +4,31 @@ set -e
 echo "🚀 Setting up Dynatrace AI Observability Workshop Environment..."
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Secrets Server Configuration
+# Configuration
 # ═══════════════════════════════════════════════════════════════════════════
 SECRETS_SERVER_URL="${SECRETS_SERVER_URL:-https://workshop-secrets-server.azurewebsites.net/api}"
+ENV_FILE="/workspaces/dynatrace-ai-mcp-workshop/.env"
+BASHRC_FILE="$HOME/.bashrc"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Function to fetch secrets from the workshop secrets server
+# Function to add a secret to bashrc (avoiding duplicates)
+# ═══════════════════════════════════════════════════════════════════════════
+add_secret_to_bashrc() {
+    local var_name="$1"
+    local var_value="$2"
+    
+    # Remove any existing entry for this variable
+    sed -i "/^export ${var_name}=/d" "$BASHRC_FILE" 2>/dev/null || true
+    
+    # Append the new value
+    echo "export ${var_name}=\"${var_value}\"" >> "$BASHRC_FILE"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Function to fetch secrets and store as environment variables (hidden)
 # ═══════════════════════════════════════════════════════════════════════════
 fetch_workshop_secrets() {
     local token="$1"
-    local env_file="$2"
     
     echo "🔐 Fetching Azure OpenAI credentials from secrets server..."
     
@@ -27,32 +42,29 @@ fetch_workshop_secrets() {
     body=$(echo "$response" | sed '$d')
     
     if [ "$http_code" = "200" ]; then
-        # Parse JSON response and write to .env file
+        # Parse JSON response
         azure_openai_endpoint=$(echo "$body" | grep -o '"azure_openai_endpoint":"[^"]*"' | cut -d'"' -f4)
         azure_openai_api_key=$(echo "$body" | grep -o '"azure_openai_api_key":"[^"]*"' | cut -d'"' -f4)
         azure_openai_chat_deployment=$(echo "$body" | grep -o '"azure_openai_chat_deployment":"[^"]*"' | cut -d'"' -f4)
         azure_openai_embedding_deployment=$(echo "$body" | grep -o '"azure_openai_embedding_deployment":"[^"]*"' | cut -d'"' -f4)
         azure_openai_api_version=$(echo "$body" | grep -o '"azure_openai_api_version":"[^"]*"' | cut -d'"' -f4)
         
-        # Update .env file with Azure OpenAI credentials
         if [ -n "$azure_openai_endpoint" ] && [ -n "$azure_openai_api_key" ]; then
-            # Remove any existing Azure OpenAI entries
-            sed -i '/^AZURE_OPENAI_ENDPOINT=/d' "$env_file" 2>/dev/null || true
-            sed -i '/^AZURE_OPENAI_API_KEY=/d' "$env_file" 2>/dev/null || true
-            sed -i '/^AZURE_OPENAI_CHAT_DEPLOYMENT=/d' "$env_file" 2>/dev/null || true
-            sed -i '/^AZURE_OPENAI_EMBEDDING_DEPLOYMENT=/d' "$env_file" 2>/dev/null || true
-            sed -i '/^AZURE_OPENAI_API_VERSION=/d' "$env_file" 2>/dev/null || true
+            # Export to current shell
+            export AZURE_OPENAI_ENDPOINT="${azure_openai_endpoint}"
+            export AZURE_OPENAI_API_KEY="${azure_openai_api_key}"
+            export AZURE_OPENAI_CHAT_DEPLOYMENT="${azure_openai_chat_deployment}"
+            export AZURE_OPENAI_EMBEDDING_DEPLOYMENT="${azure_openai_embedding_deployment}"
+            export AZURE_OPENAI_API_VERSION="${azure_openai_api_version}"
             
-            # Append credentials
-            echo "" >> "$env_file"
-            echo "# Azure OpenAI Configuration (fetched from secrets server)" >> "$env_file"
-            echo "AZURE_OPENAI_ENDPOINT=${azure_openai_endpoint}" >> "$env_file"
-            echo "AZURE_OPENAI_API_KEY=${azure_openai_api_key}" >> "$env_file"
-            echo "AZURE_OPENAI_CHAT_DEPLOYMENT=${azure_openai_chat_deployment}" >> "$env_file"
-            echo "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=${azure_openai_embedding_deployment}" >> "$env_file"
-            echo "AZURE_OPENAI_API_VERSION=${azure_openai_api_version}" >> "$env_file"
+            # Add to bashrc for new terminals (hidden in shell config)
+            add_secret_to_bashrc "AZURE_OPENAI_ENDPOINT" "${azure_openai_endpoint}"
+            add_secret_to_bashrc "AZURE_OPENAI_API_KEY" "${azure_openai_api_key}"
+            add_secret_to_bashrc "AZURE_OPENAI_CHAT_DEPLOYMENT" "${azure_openai_chat_deployment}"
+            add_secret_to_bashrc "AZURE_OPENAI_EMBEDDING_DEPLOYMENT" "${azure_openai_embedding_deployment}"
+            add_secret_to_bashrc "AZURE_OPENAI_API_VERSION" "${azure_openai_api_version}"
             
-            echo "✅ Azure OpenAI credentials configured successfully!"
+            echo "✅ Azure OpenAI credentials configured!"
             return 0
         else
             echo "❌ Failed to parse credentials from response"
@@ -73,37 +85,60 @@ echo "📦 Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r /workspaces/dynatrace-ai-mcp-workshop/app/requirements.txt
 
-# Create attendee configuration if it doesn't exist
-ENV_FILE="/workspaces/dynatrace-ai-mcp-workshop/.env"
-if [ ! -f "$ENV_FILE" ]; then
-    echo "📝 Creating environment configuration template..."
-    cp /workspaces/dynatrace-ai-mcp-workshop/app/.env.template "$ENV_FILE"
-    
-    # Generate a unique attendee ID if not set
-    if [ -z "$ATTENDEE_ID" ]; then
-        RANDOM_ID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
-        sed -i "s/ATTENDEE_ID=your-initials-here/ATTENDEE_ID=attendee-${RANDOM_ID}/" "$ENV_FILE"
-        echo "✨ Generated unique attendee ID: attendee-${RANDOM_ID}"
-    fi
+# ═══════════════════════════════════════════════════════════════════════════
+# Set up hidden secrets file (sourced by shell, not visible in .env)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Set ATTENDEE_ID from Codespaces secret or generate one
+if [ -n "$ATTENDEE_ID" ]; then
+    export ATTENDEE_ID="${ATTENDEE_ID}"
+    add_secret_to_bashrc "ATTENDEE_ID" "${ATTENDEE_ID}"
+    echo "✅ Using attendee ID: ${ATTENDEE_ID}"
+else
+    # Generate a random ID if not provided
+    RANDOM_ID=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
+    export ATTENDEE_ID="attendee-${RANDOM_ID}"
+    add_secret_to_bashrc "ATTENDEE_ID" "attendee-${RANDOM_ID}"
+    echo "✨ Generated unique attendee ID: attendee-${RANDOM_ID}"
 fi
 
-# ═══════════════════════════════════════════════════════════════════════════
-# Fetch secrets using workshop token
-# ═══════════════════════════════════════════════════════════════════════════
-# Check if we already have Azure OpenAI credentials
-if grep -q "^AZURE_OPENAI_API_KEY=.\+" "$ENV_FILE" 2>/dev/null; then
-    echo "✅ Azure OpenAI credentials already configured"
+# Fetch Azure OpenAI credentials using workshop token
+if [ -n "$WORKSHOP_TOKEN" ]; then
+    fetch_workshop_secrets "$WORKSHOP_TOKEN"
 else
-    # WORKSHOP_TOKEN is provided via Codespaces recommended secret prompt
-    if [ -n "$WORKSHOP_TOKEN" ]; then
-        echo "🔐 Fetching Azure OpenAI credentials using workshop token..."
-        fetch_workshop_secrets "$WORKSHOP_TOKEN" "$ENV_FILE"
-    else
-        echo ""
-        echo "⚠️  No workshop token found."
-        echo "   If you skipped the token prompt, run: bash .devcontainer/fetch-secrets.sh"
-        echo ""
-    fi
+    echo ""
+    echo "⚠️  No workshop token found."
+    echo "   If you skipped the token prompt, run: bash .devcontainer/fetch-secrets.sh"
+    echo ""
+fi
+
+# Secrets are now directly in bashrc - no separate file needed
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Create Dynatrace credentials template (for attendee to fill in)
+# ═══════════════════════════════════════════════════════════════════════════
+if [ ! -f "$ENV_FILE" ]; then
+    echo "📝 Creating Dynatrace configuration template..."
+    cat > "$ENV_FILE" << 'EOF'
+# ═══════════════════════════════════════════════════════════════════════════════
+# Dynatrace AI Observability Workshop - Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# This file contains your Dynatrace credentials.
+# The Azure OpenAI credentials are already configured in your environment.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DYNATRACE CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════════
+# Get these from your instructor or your Dynatrace environment
+# Environment URL format: https://{your-environment-id}.live.dynatrace.com
+
+DT_ENDPOINT=
+DT_API_TOKEN=
+EOF
+    echo "✅ Created .env file - add your Dynatrace credentials"
 fi
 
 echo ""
@@ -111,12 +146,14 @@ echo "╔═══════════════════════�
 echo "║     🎯 Dynatrace AI Observability Workshop Environment Ready!    ║"
 echo "╠══════════════════════════════════════════════════════════════════╣"
 echo "║                                                                  ║"
-echo "║  📚 Open the workshop guide:                                     ║"
-echo "║     https://sudosmitty.github.io/dynatrace-ai-mcp-workshop       ║"
+echo "║  ✅ Azure OpenAI credentials: Configured (hidden)               ║"
+echo "║  ✅ Attendee ID: Set in environment                             ║"
 echo "║                                                                  ║"
-echo "║  🔧 Next Steps:                                                  ║"
-echo "║     1. Verify your .env file has all credentials                 ║"
-echo "║     2. Follow the workshop labs                                  ║"
+echo "║  📝 ACTION REQUIRED:                                            ║"
+echo "║     Edit .env file to add your Dynatrace credentials            ║"
+echo "║                                                                  ║"
+echo "║  📚 Workshop Guide:                                             ║"
+echo "║     https://sudosmitty.github.io/dynatrace-ai-mcp-workshop       ║"
 echo "║                                                                  ║"
 echo "╚══════════════════════════════════════════════════════════════════╝"
 echo ""

@@ -27,9 +27,11 @@ Before starting, ensure you have:
 
    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1)
 
-2. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
+2. **You'll be prompted for two things:**
+   - **Attendee ID** - Enter your initials or a unique identifier (e.g., `jsmith`, `user01`)
+   - **Workshop Token** - Your instructor will share this (e.g., `dynatrace2026`)
 
-3. **You'll be prompted for a workshop token.** Your instructor will share a simple word or phrase (like `dynatrace2026`). Enter it in the prompt.
+3. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
 
 4. Once ready, you'll see VS Code in your browser with the workshop files
 
@@ -37,37 +39,17 @@ Before starting, ensure you have:
 
 ---
 
-## Step 2: Configure Your Environment
+## Step 2: Configure Dynatrace Credentials
 
-### 2.1 Verify Azure OpenAI Credentials
+Your Attendee ID and Azure OpenAI credentials were configured automatically during Codespace creation. They're stored securely as environment variables (not visible in files). You just need to add your Dynatrace credentials.
 
-During Codespace setup, you should have entered the workshop token. Verify your `.env` file has Azure OpenAI credentials:
+### 2.1 Open the Environment File
 
 1. In the VS Code Explorer, locate and open the `.env` file in the root directory
 
-2. Look for these lines (added automatically):
-   ```bash
-   AZURE_OPENAI_ENDPOINT=https://...
-   AZURE_OPENAI_API_KEY=...
-   ```
+2. You'll see it only contains placeholders for Dynatrace credentials
 
-3. If you don't see them, run this command to re-fetch credentials:
-   ```bash
-   bash .devcontainer/fetch-secrets.sh
-   ```
-
-### 2.2 Set Your Attendee ID
-
-Find and replace the `ATTENDEE_ID` placeholder with your initials or a unique identifier:
-
-```bash
-# Example: Use your initials or name
-ATTENDEE_ID=jsmith
-```
-
-> **Important:** This ID will be used to name your service, making it easy to find YOUR traces in the shared Dynatrace environment.
-
-### 2.3 Configure Dynatrace Credentials
+### 2.2 Add Dynatrace Credentials
 
 Your instructor will provide the following values. Enter them in your `.env` file:
 
@@ -77,28 +59,23 @@ DT_ENDPOINT=https://YOUR_ENV.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYY
 ```
 
-### 2.4 Verify Configuration
+### 2.3 Verify Configuration
 
 Your complete `.env` file should look like this:
 
 ```bash
-# Attendee Configuration
-ATTENDEE_ID=jsmith
-
 # Dynatrace Configuration
 DT_ENDPOINT=https://abc12345.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.EXAMPLE_TOKEN_HERE
+```
 
-# Azure OpenAI Configuration (fetched from secrets server)
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
-AZURE_OPENAI_API_KEY=your-key-here
-AZURE_OPENAI_CHAT_DEPLOYMENT=gpt-4o-mini
-AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-ada-002
-AZURE_OPENAI_API_VERSION=2024-08-01-preview
+> **ℹ️ Note:** Azure OpenAI credentials and your Attendee ID are automatically available as environment variables. You won't see them in the `.env` file - this is by design for security.
 
-# App Configuration (leave as default)
-APP_HOST=0.0.0.0
-APP_PORT=8000
+To verify your environment variables are set, run in the terminal:
+
+```bash
+echo "Attendee: $ATTENDEE_ID"
+echo "Azure OpenAI: ${AZURE_OPENAI_ENDPOINT:+configured}"
 ```
 
 ---
@@ -156,9 +133,9 @@ Press `Ctrl+C` in the terminal to stop the application.
 Before proceeding to Lab 1, verify:
 
 - [ ] Your Codespace is running
-- [ ] The `.env` file is configured with your `ATTENDEE_ID`
-- [ ] The `.env` file has the `DT_ENDPOINT` and `DT_API_TOKEN` from your instructor
+- [ ] The `.env` file has your `ATTENDEE_ID` (set via Codespace prompt)
 - [ ] The `.env` file has `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_KEY` (fetched via workshop token)
+- [ ] The `.env` file has the `DT_ENDPOINT` and `DT_API_TOKEN` from your instructor
 - [ ] The sample application starts without errors
 - [ ] You can access the application in your browser
 - [ ] The chat endpoint responds with AI-generated text
@@ -169,7 +146,7 @@ Before proceeding to Lab 1, verify:
 
 ### "Azure OpenAI credentials not found"
 
-If you missed entering the workshop token during setup:
+If you skipped entering the workshop token during Codespace creation:
 1. Get the workshop token from your instructor
 2. Run: `bash .devcontainer/fetch-secrets.sh`
 3. Enter the workshop token when prompted
@@ -177,9 +154,15 @@ If you missed entering the workshop token during setup:
 
 ### "Invalid workshop token"
 
-1. Double-check you've copied the token correctly from your instructor
+1. Double-check you've entered the token correctly
 2. Make sure there are no extra spaces
 3. Ask your instructor to verify the token is correct
+
+### Missing or wrong ATTENDEE_ID
+
+If you skipped the Attendee ID prompt or want to change it:
+1. Open the `.env` file
+2. Update the `ATTENDEE_ID=` line with your initials
 
 ### "Connection refused" on port 8000
 

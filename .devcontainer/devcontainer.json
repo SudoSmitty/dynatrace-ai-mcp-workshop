@@ -26,6 +26,9 @@
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "secrets": {
+    "ATTENDEE_ID": {
+      "description": "Your initials or unique identifier (e.g., 'jsmith', 'user01')"
+    },
     "WORKSHOP_TOKEN": {
       "description": "Workshop token provided by your instructor (e.g., 'dynatrace2026')"
     }

@@ -2,10 +2,23 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # Fetch Workshop Secrets
 # Run this script if you need to re-fetch Azure OpenAI credentials
+# Secrets are stored directly in ~/.bashrc (no separate file)
 # ═══════════════════════════════════════════════════════════════════════════
 
 SECRETS_SERVER_URL="${SECRETS_SERVER_URL:-https://workshop-secrets-server.azurewebsites.net/api}"
-ENV_FILE="/workspaces/dynatrace-ai-mcp-workshop/.env"
+BASHRC_FILE="$HOME/.bashrc"
+
+# Function to add a secret to bashrc (avoiding duplicates)
+add_secret_to_bashrc() {
+    local var_name="$1"
+    local var_value="$2"
+    
+    # Remove any existing entry for this variable
+    sed -i "/^export ${var_name}=/d" "$BASHRC_FILE" 2>/dev/null || true
+    
+    # Append the new value
+    echo "export ${var_name}=\"${var_value}\"" >> "$BASHRC_FILE"
+}
 
 echo "🔐 Fetching Azure OpenAI credentials..."
 echo ""
@@ -35,31 +48,31 @@ if [ "$http_code" = "200" ]; then
     azure_openai_api_version=$(echo "$body" | grep -o '"azure_openai_api_version":"[^"]*"' | cut -d'"' -f4)
     
     if [ -n "$azure_openai_endpoint" ] && [ -n "$azure_openai_api_key" ]; then
-        # Remove any existing Azure OpenAI entries
-        sed -i '/^AZURE_OPENAI_ENDPOINT=/d' "$ENV_FILE" 2>/dev/null || true
-        sed -i '/^AZURE_OPENAI_API_KEY=/d' "$ENV_FILE" 2>/dev/null || true
-        sed -i '/^AZURE_OPENAI_CHAT_DEPLOYMENT=/d' "$ENV_FILE" 2>/dev/null || true
-        sed -i '/^AZURE_OPENAI_EMBEDDING_DEPLOYMENT=/d' "$ENV_FILE" 2>/dev/null || true
-        sed -i '/^AZURE_OPENAI_API_VERSION=/d' "$ENV_FILE" 2>/dev/null || true
+        # Export to current shell
+        export AZURE_OPENAI_ENDPOINT="${azure_openai_endpoint}"
+        export AZURE_OPENAI_API_KEY="${azure_openai_api_key}"
+        export AZURE_OPENAI_CHAT_DEPLOYMENT="${azure_openai_chat_deployment}"
+        export AZURE_OPENAI_EMBEDDING_DEPLOYMENT="${azure_openai_embedding_deployment}"
+        export AZURE_OPENAI_API_VERSION="${azure_openai_api_version}"
         
-        # Append credentials
-        echo "" >> "$ENV_FILE"
-        echo "# Azure OpenAI Configuration (fetched from secrets server)" >> "$ENV_FILE"
-        echo "AZURE_OPENAI_ENDPOINT=${azure_openai_endpoint}" >> "$ENV_FILE"
-        echo "AZURE_OPENAI_API_KEY=${azure_openai_api_key}" >> "$ENV_FILE"
-        echo "AZURE_OPENAI_CHAT_DEPLOYMENT=${azure_openai_chat_deployment}" >> "$ENV_FILE"
-        echo "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=${azure_openai_embedding_deployment}" >> "$ENV_FILE"
-        echo "AZURE_OPENAI_API_VERSION=${azure_openai_api_version}" >> "$ENV_FILE"
+        # Add to bashrc for new terminals
+        add_secret_to_bashrc "AZURE_OPENAI_ENDPOINT" "${azure_openai_endpoint}"
+        add_secret_to_bashrc "AZURE_OPENAI_API_KEY" "${azure_openai_api_key}"
+        add_secret_to_bashrc "AZURE_OPENAI_CHAT_DEPLOYMENT" "${azure_openai_chat_deployment}"
+        add_secret_to_bashrc "AZURE_OPENAI_EMBEDDING_DEPLOYMENT" "${azure_openai_embedding_deployment}"
+        add_secret_to_bashrc "AZURE_OPENAI_API_VERSION" "${azure_openai_api_version}"
         
         echo ""
-        echo "✅ Azure OpenAI credentials configured successfully!"
+        echo "✅ Azure OpenAI credentials configured!"
         echo ""
-        echo "Your .env file has been updated with:"
+        echo "The following environment variables are now set:"
         echo "   • AZURE_OPENAI_ENDPOINT"
         echo "   • AZURE_OPENAI_API_KEY"
         echo "   • AZURE_OPENAI_CHAT_DEPLOYMENT"
         echo "   • AZURE_OPENAI_EMBEDDING_DEPLOYMENT"
         echo "   • AZURE_OPENAI_API_VERSION"
+        echo ""
+        echo "🔄 Open a new terminal or run: source ~/.bashrc"
     else
         echo "❌ Failed to parse credentials from response"
         exit 1

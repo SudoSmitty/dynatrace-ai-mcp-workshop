@@ -137,6 +137,52 @@ curl -X POST https://workshop-secrets-server.azurewebsites.net/api/get-credentia
 
 ---
 
+## How Secrets Work
+
+The workshop uses a security-first approach to credential distribution:
+
+### What Attendees See
+
+1. **During Codespace creation:** Prompted for `ATTENDEE_ID` and `WORKSHOP_TOKEN`
+2. **In `.env` file:** Only Dynatrace credentials (which they need to enter manually)
+3. **Azure OpenAI credentials:** Hidden from view
+
+### How It Works Internally
+
+1. When the Codespace starts, `setup.sh` runs
+2. It fetches Azure OpenAI credentials from the secrets server using the workshop token
+3. Credentials are exported directly to `~/.bashrc` as environment variables
+4. No intermediate files are created - secrets exist only in memory and bashrc
+5. Python's `os.getenv()` reads these environment variables seamlessly
+
+### Why This Approach?
+
+- **Security:** Attendees never see Azure OpenAI API keys (buried in bashrc, no obvious files)
+- **Simplicity:** One token shared verbally; no credential files to distribute
+- **Flexibility:** Token can be rotated per workshop without changing documentation
+- **Isolation:** Each Codespace is independent with its own environment
+- **No files to find:** No `.workshop-secrets` or similar files for curious attendees to discover
+
+### Attendee Troubleshooting
+
+If an attendee's Azure OpenAI credentials aren't working:
+
+```bash
+# Check if secrets are loaded
+echo "Azure: ${AZURE_OPENAI_ENDPOINT:+configured}"
+echo "Attendee: $ATTENDEE_ID"
+
+# Re-fetch credentials (will prompt for workshop token)
+bash .devcontainer/fetch-secrets.sh
+
+# Then reload bashrc or open a new terminal
+source ~/.bashrc
+```
+
+> **Note:** If an attendee asks where the secrets are stored, they're in `~/.bashrc`. This is intentionally obscure - most attendees won't think to look there.
+
+---
+
 ## Credential Distribution
 
 Create a simple slide or document to share with attendees:
@@ -146,14 +192,22 @@ Create a simple slide or document to share with attendees:
 ║          Dynatrace AI Workshop - Credentials                  ║
 ╠═══════════════════════════════════════════════════════════════╣
 ║                                                               ║
-║  WORKSHOP TOKEN (enter when creating Codespace):              ║
-║  dynatrace2026                                                ║
+║  When creating your Codespace, you'll be prompted for:        ║
+║                                                               ║
+║  ATTENDEE ID:  (use your initials, e.g., jsmith)             ║
+║  WORKSHOP TOKEN:  dynatrace2026                               ║
+║                                                               ║
+║  ─────────────────────────────────────────────────────────────║
+║                                                               ║
+║  After Codespace starts, add to your .env file:               ║
 ║                                                               ║
 ║  DT_ENDPOINT:                                                 ║
 ║  https://abc12345.live.dynatrace.com/api/v2/otlp             ║
 ║                                                               ║
 ║  DT_API_TOKEN:                                                ║
 ║  dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYYYYYYYYYYYYYY              ║
+║                                                               ║
+║  ─────────────────────────────────────────────────────────────║
 ║                                                               ║
 ║  Dynatrace UI:                                                ║
 ║  https://abc12345.live.dynatrace.com                          ║
@@ -163,7 +217,7 @@ Create a simple slide or document to share with attendees:
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
-> **Tip:** The workshop token can be a simple, memorable word or phrase. It's entered by attendees when they create their Codespace, and it fetches the Azure OpenAI credentials automatically.
+> **Tip:** The workshop token should be a simple, memorable word. Both the Attendee ID and Workshop Token are entered when attendees create their Codespace—they won't need to edit these values manually.
 
 ---
 
