@@ -8,8 +8,8 @@ This document provides guidance for instructors running the workshop.
 
 - [ ] Verify Dynatrace playground tenant access
 - [ ] Create API token with required permissions
-- [ ] Test OpenAI API key quota
-- [ ] Configure GitHub Secrets for the repository (OPENAI_API_KEY)
+- [ ] Verify Azure OpenAI resource is provisioned and accessible
+- [ ] Deploy the secrets server Azure Function (see [Secrets Server Setup](#secrets-server-setup))
 - [ ] Test Codespace creation end-to-end
 - [ ] Prepare attendee credential sharing document
 
@@ -19,7 +19,9 @@ This document provides guidance for instructors running the workshop.
 
 - [ ] Verify Dynatrace tenant is accessible
 - [ ] Test API token is working
-- [ ] Verify OpenAI API has sufficient credits
+- [ ] Verify Azure OpenAI deployments are responding
+- [ ] Generate a new workshop token and update the secrets server
+- [ ] Test the full flow: Codespace → workshop token → app runs
 - [ ] Prepare backup credentials if needed
 - [ ] Send reminder to attendees with GitHub account requirements
 
@@ -32,6 +34,159 @@ This document provides guidance for instructors running the workshop.
 
 ---
 
+## Secrets Server Setup
+
+The workshop uses an Azure Function to securely distribute Azure OpenAI credentials to attendees. This avoids sharing raw API keys and allows token rotation per workshop.
+
+### Initial Deployment (One-Time)
+
+```bash
+# Login to Azure
+az login
+
+# Create resource group
+az group create --name rg-workshop-secrets --location eastus
+
+# Create storage account (required for Azure Functions)
+az storage account create \
+  --name stworkshopsecrets \
+  --resource-group rg-workshop-secrets \
+  --location eastus \
+  --sku Standard_LRS
+
+# Create Function App
+az functionapp create \
+  --name workshop-secrets-server \
+  --resource-group rg-workshop-secrets \
+  --storage-account stworkshopsecrets \
+  --consumption-plan-location eastus \
+  --runtime python \
+  --runtime-version 3.11 \
+  --functions-version 4 \
+  --os-type linux
+
+# Deploy the function
+cd secrets-server
+func azure functionapp publish workshop-secrets-server
+```
+
+### Configure Azure OpenAI Credentials (One-Time)
+
+```bash
+az functionapp config appsettings set \
+  --name workshop-secrets-server \
+  --resource-group rg-workshop-secrets \
+  --settings \
+    AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com" \
+    AZURE_OPENAI_API_KEY="your-azure-openai-api-key" \
+    AZURE_OPENAI_CHAT_DEPLOYMENT="gpt-4o-mini" \
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-ada-002" \
+    AZURE_OPENAI_API_VERSION="2024-08-01-preview"
+```
+
+### Generate Workshop Token (Per Workshop)
+
+You can rotate the workshop token using the GitHub Actions workflow or manually via Azure CLI.
+
+#### Option A: GitHub Actions (Recommended)
+
+1. Go to the repository's **Actions** tab
+2. Select **"Rotate Workshop Token"** workflow
+3. Click **"Run workflow"**
+4. Optionally enter a custom token (e.g., `dynatrace2026`) or leave empty to auto-generate
+5. Click **"Run workflow"**
+6. View the workflow summary to see the new token
+
+> **Prerequisites:** Configure these in repository Settings → Secrets and variables → Actions:
+>
+> **Secrets (for Azure OIDC authentication):**
+> - `AZURE_CLIENT_ID` - Service principal/app client ID
+> - `AZURE_TENANT_ID` - Azure AD tenant ID  
+> - `AZURE_SUBSCRIPTION_ID` - Azure subscription ID
+>
+> **Variables:**
+> - `AZURE_RESOURCE_GROUP` - e.g., `rg-workshop-secrets`
+> - `AZURE_FUNCTION_APP_NAME` - e.g., `workshop-secrets-server`
+
+#### Option B: Azure CLI (Manual)
+
+```bash
+# Use a simple word or phrase - easy to share verbally!
+# Examples: dynatrace2026, aiworkshop, observability
+NEW_TOKEN="dynatrace2026"
+
+# Update the function app setting
+az functionapp config appsettings set \
+  --name workshop-secrets-server \
+  --resource-group rg-workshop-secrets \
+  --settings WORKSHOP_TOKEN="$NEW_TOKEN"
+
+echo "Workshop Token: $NEW_TOKEN"
+```
+
+> **Tip:** Use simple, memorable words that are easy to share verbally and type correctly.
+
+### Verify Setup
+
+```bash
+# Test the endpoint
+curl -X POST https://workshop-secrets-server.azurewebsites.net/api/get-credentials \
+  -H "Content-Type: application/json" \
+  -d '{"workshop_token": "YOUR_TOKEN_HERE"}'
+```
+
+---
+
+## How Secrets Work
+
+The workshop uses a security-first approach to credential distribution:
+
+### What Attendees See
+
+1. **Codespace starts** - No prompts during creation (cleaner UX)
+2. **Terminal shows prompt** - Asks them to run `fetch-secrets.sh`
+3. **Interactive setup** - They enter attendee ID and workshop token (visible, not masked)
+4. **In `.env` file:** Only Dynatrace credentials (which they need to enter manually)
+5. **Azure OpenAI credentials:** Hidden in `~/.bashrc`
+
+### How It Works Internally
+
+1. When the Codespace starts, `setup.sh` runs
+2. It generates a random attendee ID and shows a prompt to run `fetch-secrets.sh`
+3. Attendee runs `fetch-secrets.sh` which prompts for ID and workshop token
+4. Script fetches Azure OpenAI credentials from the secrets server
+5. Credentials are exported directly to `~/.bashrc` as environment variables
+6. No intermediate files are created - secrets exist only in memory and bashrc
+7. Python's `os.getenv()` reads these environment variables seamlessly
+
+### Why This Approach?
+
+- **Security:** Attendees never see Azure OpenAI API keys (buried in bashrc, no obvious files)
+- **Simplicity:** One token shared verbally; no credential files to distribute
+- **Flexibility:** Token can be rotated per workshop without changing documentation
+- **Isolation:** Each Codespace is independent with its own environment
+- **No files to find:** No `.workshop-secrets` or similar files for curious attendees to discover
+
+### Attendee Troubleshooting
+
+If an attendee's Azure OpenAI credentials aren't working:
+
+```bash
+# Check if secrets are loaded
+echo "Azure: ${AZURE_OPENAI_ENDPOINT:+configured}"
+echo "Attendee: $ATTENDEE_ID"
+
+# Re-fetch credentials (will prompt for workshop token)
+bash .devcontainer/fetch-secrets.sh
+
+# Then reload bashrc or open a new terminal
+source ~/.bashrc
+```
+
+> **Note:** If an attendee asks where the secrets are stored, they're in `~/.bashrc`. This is intentionally obscure - most attendees won't think to look there.
+
+---
+
 ## Credential Distribution
 
 Create a simple slide or document to share with attendees:
@@ -41,11 +196,25 @@ Create a simple slide or document to share with attendees:
 ║          Dynatrace AI Workshop - Credentials                  ║
 ╠═══════════════════════════════════════════════════════════════╣
 ║                                                               ║
+║  After your Codespace starts, run this command:               ║
+║                                                               ║
+║    bash .devcontainer/fetch-secrets.sh                        ║
+║                                                               ║
+║  You'll be prompted for:                                      ║
+║    • Attendee ID: (your initials, e.g., jsmith)              ║
+║    • Workshop Token: dynatrace2026                            ║
+║                                                               ║
+║  ─────────────────────────────────────────────────────────────║
+║                                                               ║
+║  Then add to your .env file:                                  ║
+║                                                               ║
 ║  DT_ENDPOINT:                                                 ║
 ║  https://abc12345.live.dynatrace.com/api/v2/otlp             ║
 ║                                                               ║
 ║  DT_API_TOKEN:                                                ║
 ║  dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYYYYYYYYYYYYYY              ║
+║                                                               ║
+║  ─────────────────────────────────────────────────────────────║
 ║                                                               ║
 ║  Dynatrace UI:                                                ║
 ║  https://abc12345.live.dynatrace.com                          ║
@@ -54,6 +223,8 @@ Create a simple slide or document to share with attendees:
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
+
+> **Tip:** The workshop token is visible when attendees type it (not masked), making it easier to verify they entered it correctly.
 
 ---
 
@@ -79,13 +250,23 @@ Create a simple slide or document to share with attendees:
 2. Try a different browser
 3. Have attendee create from repo page directly
 
-### OpenAI Errors
+### Azure OpenAI Errors
 
-**Symptom:** "API key invalid" or rate limiting
+**Symptom:** "API key invalid", "Resource not found", or rate limiting
 **Solution:**
-1. Verify OPENAI_API_KEY secret is set correctly
-2. Check OpenAI usage dashboard for quota
-3. Have backup API key ready
+1. Verify the secrets server is running: `curl https://workshop-secrets-server.azurewebsites.net/api/health`
+2. Check the workshop token is correct in the secrets server app settings
+3. Check Azure OpenAI resource quotas in Azure Portal
+4. Verify deployment names match (gpt-4o-mini, text-embedding-ada-002)
+5. Have attendees re-run: `bash .devcontainer/fetch-secrets.sh`
+
+### Invalid Workshop Token
+
+**Symptom:** Attendee gets "Invalid workshop token" error
+**Solution:**
+1. Verify the workshop token on your slide matches the one configured in the secrets server
+2. Check for copy/paste errors (extra spaces, missing characters)
+3. Have attendee re-run: `bash .devcontainer/fetch-secrets.sh`
 
 ### No Traces in Dynatrace
 
@@ -152,9 +333,9 @@ When showing MCP:
 - Focus on instrumentation concepts
 - Show screenshots of expected results
 
-### If OpenAI Unavailable
+### If Azure OpenAI Unavailable
 
-- Have a mock/stub endpoint ready
+- Have a backup Azure OpenAI resource in a different region
 - Focus on instrumentation patterns
 - Can still explain the concepts
 

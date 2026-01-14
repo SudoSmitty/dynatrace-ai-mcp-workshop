@@ -98,7 +98,7 @@ fetch spans
 
 ```sql
 fetch spans
-| filter span.name matches "openai.*"
+| filter span.name matches "azure_openai.*"
 | summarize 
     avg_latency = avg(duration),
     p50_latency = percentile(duration, 50),

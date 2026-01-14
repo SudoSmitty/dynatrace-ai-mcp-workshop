@@ -35,29 +35,47 @@ Before starting, ensure you have:
 
 ---
 
-## Step 2: Configure Your Environment
+## Step 2: Configure Workshop Credentials
 
-### 2.1 Open the Environment File
+After the Codespace starts, you'll see a message asking you to configure your credentials.
+
+### 2.1 Run the Setup Script
+
+Open a terminal in VS Code (`Ctrl+`` ` or `Cmd+`` `) and run:
+
+```bash
+bash .devcontainer/fetch-secrets.sh
+```
+
+### 2.2 Enter Your Credentials
+
+You'll be prompted for:
+1. **Attendee ID** - Enter your initials (e.g., `jsmith`) or press Enter to auto-generate
+2. **Workshop Token** - Your instructor will provide this
+
+```
+🔐 Workshop Credentials Setup
+
+Enter your attendee ID (e.g., your name or initials, no spaces) [press enter to generate]: jsmith
+✅ Attendee ID: jsmith
+
+Enter your workshop token: dynatrace2026
+✅ Azure OpenAI credentials configured!
+```
+
+---
+
+## Step 3: Configure Dynatrace Credentials
+
+Your Attendee ID and Azure OpenAI credentials are now configured as environment variables. You just need to add your Dynatrace credentials.
+
+### 3.1 Open the Environment File
 
 1. In the VS Code Explorer, locate and open the `.env` file in the root directory
 
-2. If no `.env` file exists, copy from the template:
-   ```bash
-   cp app/.env.template .env
-   ```
+2. You'll see it only contains placeholders for Dynatrace credentials
 
-### 2.2 Set Your Attendee ID
-
-Replace the placeholder with your initials or a unique identifier:
-
-```bash
-# Example: Use your initials or name
-ATTENDEE_ID=jsmith
-```
-
-> **Important:** This ID will be used to name your service, making it easy to find YOUR traces in the shared Dynatrace environment.
-
-### 2.3 Configure Dynatrace Credentials
+### 3.2 Add Dynatrace Credentials
 
 Your instructor will provide the following values. Enter them in your `.env` file:
 
@@ -67,21 +85,23 @@ DT_ENDPOINT=https://YOUR_ENV.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYY
 ```
 
-### 2.4 Verify Configuration
+### 3.3 Verify Configuration
 
 Your complete `.env` file should look like this:
 
 ```bash
-# Attendee Configuration
-ATTENDEE_ID=jsmith
-
 # Dynatrace Configuration
 DT_ENDPOINT=https://abc12345.live.dynatrace.com/api/v2/otlp
 DT_API_TOKEN=dt0c01.EXAMPLE_TOKEN_HERE
+```
 
-# App Configuration (leave as default)
-APP_HOST=0.0.0.0
-APP_PORT=8000
+> **ℹ️ Note:** Azure OpenAI credentials and your Attendee ID are stored as environment variables (not in the `.env` file) for security.
+
+To verify your environment variables are set, run in the terminal:
+
+```bash
+echo "Attendee: $ATTENDEE_ID"
+echo "Azure OpenAI: ${AZURE_OPENAI_ENDPOINT:+configured}"
 ```
 
 ---
@@ -139,7 +159,8 @@ Press `Ctrl+C` in the terminal to stop the application.
 Before proceeding to Lab 1, verify:
 
 - [ ] Your Codespace is running
-- [ ] The `.env` file is configured with your `ATTENDEE_ID`
+- [ ] The `.env` file has your `ATTENDEE_ID` (set via Codespace prompt)
+- [ ] The `.env` file has `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_KEY` (fetched via workshop token)
 - [ ] The `.env` file has the `DT_ENDPOINT` and `DT_API_TOKEN` from your instructor
 - [ ] The sample application starts without errors
 - [ ] You can access the application in your browser
@@ -149,11 +170,25 @@ Before proceeding to Lab 1, verify:
 
 ## 🆘 Troubleshooting
 
-### "OPENAI_API_KEY not set"
+### "Azure OpenAI credentials not found"
 
-The OpenAI API key is provided via GitHub Secrets. If you see this error:
-1. Make sure you're using the official workshop repository
-2. Contact your instructor - they may need to add the secret
+If you skipped entering the workshop token during Codespace creation:
+1. Get the workshop token from your instructor
+2. Run: `bash .devcontainer/fetch-secrets.sh`
+3. Enter the workshop token when prompted
+4. Verify your `.env` file now has the Azure OpenAI credentials
+
+### "Invalid workshop token"
+
+1. Double-check you've entered the token correctly
+2. Make sure there are no extra spaces
+3. Ask your instructor to verify the token is correct
+
+### Missing or wrong ATTENDEE_ID
+
+If you skipped the Attendee ID prompt or want to change it:
+1. Open the `.env` file
+2. Update the `ATTENDEE_ID=` line with your initials
 
 ### "Connection refused" on port 8000
 

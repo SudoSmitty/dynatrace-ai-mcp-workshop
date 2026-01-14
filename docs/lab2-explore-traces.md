@@ -89,20 +89,20 @@ A typical RAG request trace includes these spans:
 
 ```
 📍 POST /chat (HTTP request)
-  └── 📍 openai.embeddings (Embedding generation)
+  └── 📍 azure_openai.embeddings (Embedding generation)
   └── 📍 chromadb.query (Vector store search)
-  └── 📍 openai.chat (LLM completion)
+  └── 📍 azure_openai.chat (LLM completion)
 ```
 
 ### 4.2 Examine the LLM Span
 
-Click on the `openai.chat` span to see:
+Click on the `azure_openai.chat` span to see:
 
 | Attribute | Description |
 |-----------|-------------|
-| `llm.vendor` | The LLM provider (OpenAI) |
+| `llm.vendor` | The LLM provider (Azure OpenAI) |
 | `llm.request.type` | Type of request (chat, completion) |
-| `llm.model` | The model used (gpt-4o-mini) |
+| `llm.model` | The model used (gpt-4o-mini deployment) |
 | `llm.usage.prompt_tokens` | Number of input tokens |
 | `llm.usage.completion_tokens` | Number of output tokens |
 | `llm.usage.total_tokens` | Total tokens used |
@@ -245,7 +245,7 @@ fetch spans
 
 The service flow shows:
 - Your `ai-chat-service` 
-- Outbound calls to OpenAI APIs
+- Outbound calls to Azure OpenAI APIs
 - Any other dependencies
 
 This visualization helps understand your AI application's architecture.

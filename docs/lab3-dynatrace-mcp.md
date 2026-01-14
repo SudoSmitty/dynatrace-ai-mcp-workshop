@@ -223,7 +223,7 @@ You can ask MCP to run DQL queries:
 ### 7.3 Cost Analysis
 
 ```
-@dynatrace Estimate the OpenAI API costs based on token usage for my service today
+@dynatrace Estimate the Azure OpenAI API costs based on token usage for my service today
 ```
 
 ---
@@ -308,8 +308,8 @@ Start broad, then drill down:
 You can use MCP alongside your code:
 
 ```
-I'm looking at main.py line 150 where I call OpenAI. 
-@dynatrace What's the average latency for OpenAI calls from my service?
+I'm looking at main.py where I call Azure OpenAI. 
+@dynatrace What's the average latency for Azure OpenAI calls from my service?
 ```
 
 ---
