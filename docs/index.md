@@ -8,7 +8,7 @@ nav_order: 1
   <h1>🎯 Dynatrace AI Observability Workshop</h1>
   <p class="hero-subtitle">Master AI/LLM monitoring with Dynatrace and the Model Context Protocol (MCP) in this hands-on workshop</p>
   <div class="hero-buttons">
-    <a href="https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1" class="btn btn-primary">
+    <a href="https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1" class="btn btn-primary" target="_blank">
       🚀 Launch Workshop Environment
     </a>
     <a href="lab0-setup" class="btn btn-secondary">
@@ -72,7 +72,7 @@ By the end of this workshop, you will be able to:
 Click the button below to launch your workshop environment:
 
 <div style="text-align: center; margin: 32px 0;">
-  <a href="https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1">
+  <a href="https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1" target="_blank">
     <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" style="height: 44px;">
   </a>
 </div>

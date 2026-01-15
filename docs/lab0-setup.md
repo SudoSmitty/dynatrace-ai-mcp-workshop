@@ -23,9 +23,9 @@ Before starting, ensure you have:
 
 ## Step 1: Launch GitHub Codespace
 
-1. Click the button below to launch your personal workshop environment:
+1. If you haven't already, click the button below to launch your personal workshop environment:
 
-   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1)
+   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sudosmitty/dynatrace-ai-mcp-workshop?quickstart=1){:target="_blank" rel="noopener noreferrer"}
 
 2. Wait for the Codespace to build (this takes 2-3 minutes on first launch)
 
@@ -37,11 +37,11 @@ Before starting, ensure you have:
 
 ## Step 2: Configure Workshop Credentials
 
-After the Codespace starts, you'll see a message asking you to configure your credentials.
+After the Codespace starts, you'll need to configure credentials.
 
 ### 2.1 Run the Setup Script
 
-Open a terminal in VS Code (`Ctrl+`` ` or `Cmd+`` `) and run:
+In the open VS Code terminal run:
 
 ```bash
 bash .devcontainer/fetch-secrets.sh
@@ -63,6 +63,12 @@ Enter your workshop token: dynatrace2026
 ✅ Azure OpenAI credentials configured!
 ```
 
+### 2.3 Load Your Credentials
+
+You will need to load your credentials into the terminal session with the following command:
+```bash
+source ~/.bashrc
+```
 ---
 
 ## Step 3: Configure Dynatrace Credentials
@@ -112,7 +118,7 @@ Let's make sure everything is working before we add instrumentation.
 
 ### 3.1 Start the Application
 
-Open a terminal in VS Code (`Ctrl+`` ` or `Cmd+`` `) and run:
+In your VS Code terminal, run:
 
 ```bash
 cd app
@@ -176,7 +182,6 @@ If you skipped entering the workshop token during Codespace creation:
 1. Get the workshop token from your instructor
 2. Run: `bash .devcontainer/fetch-secrets.sh`
 3. Enter the workshop token when prompted
-4. Verify your `.env` file now has the Azure OpenAI credentials
 
 ### "Invalid workshop token"
 
@@ -188,7 +193,7 @@ If you skipped entering the workshop token during Codespace creation:
 
 If you skipped the Attendee ID prompt or want to change it:
 1. Open the `.env` file
-2. Update the `ATTENDEE_ID=` line with your initials
+2. Add an `ATTENDEE_ID=` line with your initials
 
 ### "Connection refused" on port 8000
 
