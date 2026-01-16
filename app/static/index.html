@@ -7,6 +7,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/json.min.js"></script>
     <style>
         :root {
             --dt-purple: #612AD5;
@@ -39,17 +48,19 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         /* Header */
         .header {
             text-align: center;
-            padding: 30px 0;
+            padding: 20px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
         }
 
         .header h1 {
@@ -101,6 +112,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: 0;
         }
 
         /* Messages Area */
@@ -111,7 +123,6 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            max-height: 500px;
         }
 
         .message {
@@ -166,7 +177,89 @@
         }
 
         .message-content p {
-            margin: 0;
+            margin: 0 0 0.75em 0;
+        }
+        
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Markdown styles */
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin: 0.75em 0 0.5em 0;
+            font-weight: 600;
+        }
+        
+        .message-content h1 { font-size: 1.3em; }
+        .message-content h2 { font-size: 1.15em; }
+        .message-content h3 { font-size: 1.05em; }
+
+        .message-content ul, .message-content ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+
+        .message-content li {
+            margin: 0.25em 0;
+        }
+
+        .message-content code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 0.75em 0;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .message-content blockquote {
+            border-left: 3px solid var(--dt-purple-light);
+            margin: 0.75em 0;
+            padding-left: 1em;
+            color: var(--dt-gray-300);
+        }
+
+        .message-content strong {
+            font-weight: 600;
+        }
+
+        .message-content a {
+            color: var(--dt-blue);
+            text-decoration: none;
+        }
+
+        .message-content a:hover {
+            text-decoration: underline;
+        }
+
+        .message-content table {
+            border-collapse: collapse;
+            margin: 0.75em 0;
+            width: 100%;
+        }
+
+        .message-content th, .message-content td {
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .message-content th {
+            background: rgba(0,0,0,0.2);
         }
 
         .sources {
@@ -543,6 +636,10 @@
             sendButton.disabled = true;
             const loadingId = showTypingIndicator();
 
+            // Use AbortController with 2 minute timeout for long LLM responses
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 120000);
+
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
@@ -552,11 +649,15 @@
                     body: JSON.stringify({
                         message: message,
                         use_rag: useRagCheckbox.checked
-                    })
+                    }),
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
+
                 if (!response.ok) {
-                    throw new Error('Failed to get response');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || 'Failed to get response');
                 }
 
                 const data = await response.json();
@@ -566,8 +667,13 @@
             } catch (error) {
                 console.error('Error:', error);
                 removeTypingIndicator(loadingId);
-                showToast('Failed to send message. Please try again.', 'error');
+                if (error.name === 'AbortError') {
+                    showToast('Request timed out. Try a simpler question.', 'error');
+                } else {
+                    showToast(`Error: ${error.message}`, 'error');
+                }
             } finally {
+                clearTimeout(timeoutId);
                 isLoading = false;
                 sendButton.disabled = false;
             }
@@ -596,13 +702,28 @@
                 `;
             }
 
+            // Render markdown for assistant messages, escape for user messages
+            let renderedContent;
+            if (type === 'assistant') {
+                renderedContent = marked.parse(content);
+            } else {
+                renderedContent = `<p>${escapeHtml(content)}</p>`;
+            }
+
             messageDiv.innerHTML = `
                 <div class="message-avatar">${avatar}</div>
                 <div class="message-content">
-                    <p>${escapeHtml(content)}</p>
+                    ${renderedContent}
                     ${sourcesHtml}
                 </div>
             `;
+
+            // Apply syntax highlighting to code blocks
+            if (type === 'assistant') {
+                messageDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
 
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -657,6 +778,12 @@
                 e.preventDefault();
                 sendMessage();
             }
+        });
+
+        // Configure marked.js for safe rendering
+        marked.setOptions({
+            breaks: true,
+            gfm: true
         });
 
         // Initialize on load
