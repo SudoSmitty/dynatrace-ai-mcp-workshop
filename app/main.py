@@ -50,6 +50,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Optional, List
 import chromadb
@@ -73,11 +74,29 @@ AZURE_OPENAI_CHAT_DEPLOYMENT = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
 
+# Lifespan event handler (replaces deprecated @app.on_event)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup/shutdown events"""
+    # Startup
+    print(f"""
+    ╔══════════════════════════════════════════════════════════════════════╗
+    ║         🚀 AI Chat Service Starting...                               ║
+    ║                                                                      ║
+    ║         Attendee ID: {ATTENDEE_ID:<43}║
+    ║         Service: ai-chat-service-{ATTENDEE_ID:<28}║
+    ╚══════════════════════════════════════════════════════════════════════╝
+    """)
+    initialize_rag()
+    yield
+    # Shutdown (nothing to do)
+
 # Initialize FastAPI app with attendee-specific naming
 app = FastAPI(
     title=f"AI Chat Service - {ATTENDEE_ID}",
     description="A RAG-powered AI assistant for the Dynatrace AI Observability Workshop",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS middleware
@@ -216,6 +235,116 @@ def generate_context(docs: list) -> str:
         return "No relevant context found."
     return format_docs(docs)
 
+# Extended system prompt for Azure OpenAI prompt caching (requires 1,024+ tokens)
+RAG_SYSTEM_PROMPT = """You are an expert AI assistant for the Dynatrace AI Observability Workshop, 
+specializing in application performance monitoring, distributed tracing, and AI/LLM observability.
+You provide accurate, helpful, and technically detailed responses about observability, monitoring,
+and software instrumentation topics.
+
+## Your Expertise Areas
+
+### 1. Dynatrace Platform Overview
+Dynatrace is the leading AI-powered observability platform that provides automatic and intelligent 
+monitoring for cloud-native and enterprise environments. Key capabilities include:
+
+- **Full-stack observability**: End-to-end visibility from user experience to infrastructure
+- **Automatic discovery and instrumentation**: OneAgent technology that requires no manual configuration
+- **Davis AI engine**: Automatic root cause analysis, anomaly detection, and problem remediation
+- **Grail data lakehouse**: Unified storage and analysis of all observability data at scale
+- **Distributed tracing with PurePath**: Complete transaction visibility across microservices
+- **Real User Monitoring (RUM)**: Track actual user sessions and experiences
+- **Session Replay**: Visual playback of user sessions for debugging
+- **Synthetic monitoring**: Proactive testing from global locations
+- **Log management and analytics**: Unified log ingestion, search, and correlation
+- **Infrastructure monitoring**: Hosts, containers, Kubernetes, cloud platforms
+- **Application security**: Runtime vulnerability detection and protection (RASP)
+- **Business analytics**: Custom metrics, dashboards, and business event tracking
+
+### 2. OpenTelemetry Integration
+Dynatrace fully supports the OpenTelemetry standard for collecting telemetry data:
+
+- **OTLP ingestion**: Send traces, metrics, and logs via the /api/v2/otlp endpoint
+- **Trace context propagation**: W3C Trace Context and Baggage support
+- **Semantic conventions**: Standard attribute naming for consistent data
+- **Custom instrumentation**: Add spans and attributes to your code
+- **Span events and links**: Capture additional context within traces
+- **Resource attributes**: Service name, version, environment metadata
+- **Instrumentation libraries**: Auto-instrumentation for Python, Java, Node.js, .NET, Go
+- **Collector support**: Route data through OpenTelemetry Collector
+
+### 3. AI/LLM Observability with OpenLLMetry
+OpenLLMetry (by Traceloop) extends OpenTelemetry for AI/ML workloads:
+
+- **Automatic instrumentation**: Works with LangChain, OpenAI, Azure OpenAI, Anthropic, Cohere
+- **Token tracking**: Monitor prompt tokens, completion tokens, and total usage
+- **Latency measurement**: Track response times for LLM and embedding calls
+- **Vector database tracing**: ChromaDB, Pinecone, Weaviate, Milvus query visibility
+- **Cost estimation**: Calculate spending based on token consumption and model pricing
+- **Workflow decorators**: @workflow and @task for creating trace hierarchies
+- **Association properties**: Add business context like user ID, session ID, conversation ID
+- **Prompt/response capture**: Optional logging of inputs and outputs for debugging
+- **Model versioning**: Track which model versions are used in production
+- **Error tracking**: Capture and analyze LLM failures and rate limits
+
+### 4. LangChain Framework
+LangChain is a popular framework for building LLM applications:
+
+- **RAG pipelines**: Retrieval Augmented Generation for knowledge-enhanced responses
+- **LCEL (LangChain Expression Language)**: Declarative chain composition
+- **Document loaders**: Ingest data from files, URLs, databases, APIs
+- **Text splitters**: Chunk documents for embedding and retrieval
+- **Vector stores**: Integration with ChromaDB, Pinecone, Weaviate, FAISS
+- **Retrievers**: Query vector stores with semantic search
+- **Chat models**: Interface with OpenAI, Azure OpenAI, Anthropic, local models
+- **Embeddings**: Generate vector representations of text
+- **Prompt templates**: Reusable, parameterized prompts
+- **Output parsers**: Structure LLM responses into typed objects
+- **Memory**: Maintain conversation history across interactions
+- **Agents**: LLM-powered decision making and tool use
+- **Callbacks**: Hook into chain execution for logging and monitoring
+
+### 5. Azure OpenAI Service
+Microsoft's enterprise-grade LLM platform with unique capabilities:
+
+- **Model availability**: GPT-4, GPT-4o, GPT-4o-mini, GPT-3.5-Turbo
+- **Embedding models**: text-embedding-ada-002, text-embedding-3-small, text-embedding-3-large
+- **API versioning**: Use stable or preview versions for new features
+- **Prompt caching**: Reduce costs and latency with cached prompt prefixes (1024+ tokens)
+- **Content filtering**: Built-in responsible AI content moderation
+- **Private endpoints**: VNet integration for secure connectivity
+- **Managed identity**: Azure AD authentication without API keys
+- **Regional deployment**: Choose regions for data residency and latency
+- **Provisioned throughput**: Reserved capacity for predictable performance
+- **Fine-tuning**: Customize models with your own training data
+
+### 6. Workshop Lab Topics
+This workshop covers hands-on exercises in AI observability:
+
+- **Lab 0 - Environment Setup**: Configure GitHub Codespaces, install dependencies, set environment variables
+- **Lab 1 - Instrumentation**: Add OpenLLMetry/Traceloop to a Python RAG application
+- **Lab 2 - Trace Exploration**: Analyze AI traces in Dynatrace, understand spans and attributes
+- **Lab 3 - Dynatrace MCP**: Use Model Context Protocol for agentic AI workflows with Copilot
+
+## Response Guidelines
+
+When answering questions, follow these principles:
+
+1. **Accuracy**: Provide technically accurate information based on the context provided
+2. **Clarity**: Explain concepts clearly for intermediate developers who may be new to observability
+3. **Code Examples**: Include complete, working code snippets when helpful (use Python by default)
+4. **Best Practices**: Recommend observability and instrumentation best practices
+5. **Actionable**: Provide specific next steps when answering how-to questions
+6. **Formatting**: Use markdown for code blocks, lists, headers, and emphasis
+7. **Conciseness**: Be thorough but avoid unnecessary verbosity
+8. **Context-aware**: Reference the provided context when relevant to the question
+
+## Context from Knowledge Base
+{context}
+
+Based on the context above and your expertise, provide a helpful response to the user's question.
+If the context doesn't contain relevant information, draw upon your knowledge of the topics listed above.
+"""
+
 @task(name="generate_response")
 def generate_response(question: str, context: str) -> str:
     """
@@ -228,11 +357,8 @@ def generate_response(question: str, context: str) -> str:
     # Use chat messages format for cleaner trace capture
     from langchain_core.messages import SystemMessage, HumanMessage
     
-    system_prompt = f"""You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
-Use the following context to answer the question. If you don't know the answer based on the 
-context, say so and provide a general helpful response.
-
-Context: {context}"""
+    # Use extended system prompt (1,024+ tokens enables Azure OpenAI prompt caching)
+    system_prompt = RAG_SYSTEM_PROMPT.format(context=context)
     
     messages = [
         SystemMessage(content=system_prompt),
@@ -312,18 +438,8 @@ def initialize_rag():
             temperature=0.7
         )
         
-        # Create prompt template
-        prompt = ChatPromptTemplate.from_template(
-            """You are a helpful AI assistant for the Dynatrace AI Observability Workshop.
-            Use the following context to answer the question. If you don't know the answer based on the 
-            context, say so and provide a general helpful response.
-            
-            Context: {context}
-            
-            Question: {question}
-            
-            Answer:"""
-        )
+        # Create prompt template (uses extended system prompt for caching)
+        prompt = ChatPromptTemplate.from_template(RAG_SYSTEM_PROMPT + "\n\nQuestion: {question}\n\nAnswer:")
         
         # Create RAG chain using LCEL
         qa_chain = (
@@ -343,19 +459,6 @@ def initialize_rag():
 # ═══════════════════════════════════════════════════════════════════════════
 # API Endpoints
 # ═══════════════════════════════════════════════════════════════════════════
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize RAG on startup"""
-    print(f"""
-    ╔══════════════════════════════════════════════════════════════════════╗
-    ║         🚀 AI Chat Service Starting...                               ║
-    ║                                                                      ║
-    ║         Attendee ID: {ATTENDEE_ID:<43}║
-    ║         Service: ai-chat-service-{ATTENDEE_ID:<28}║
-    ╚══════════════════════════════════════════════════════════════════════╝
-    """)
-    initialize_rag()
 
 @app.get("/", response_class=FileResponse)
 async def root():

@@ -25,14 +25,14 @@ else:
 # ╚══════════════════════════════════════════════════════════════════════════╝
 
 from traceloop.sdk import Traceloop
-from opentelemetry.sdk.metrics.export import AggregationTemporality
 
 # Get Dynatrace configuration from environment
 ATTENDEE_ID = os.getenv("ATTENDEE_ID", "workshop-attendee")
 DT_ENDPOINT = os.getenv("DT_ENDPOINT")
 DT_API_TOKEN = os.getenv("DT_API_TOKEN")
 
-# Dynatrace requires Delta temporality for metrics
+# ⚠️ IMPORTANT: Dynatrace requires Delta temporality for metrics
+# This MUST be set before Traceloop.init()
 os.environ["OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE"] = "delta"
 
 # Initialize Traceloop with Dynatrace endpoint
