@@ -35,87 +35,75 @@ Think of it as giving your AI assistant **direct access to Dynatrace**!
 
 ---
 
-## Step 1: Install Dynatrace MCP Server
+## Step 1: Configure the Remote Dynatrace MCP Server
 
-The Dynatrace MCP server runs locally and connects your AI assistant to Dynatrace.
+The Dynatrace MCP server runs **remotely** in your Dynatrace environment—no local installation required! This makes it easy to connect your AI assistant directly to Dynatrace.
 
-### 1.1 Install via NPM
+### 1.1 Open VS Code Settings
 
-In your Codespace terminal, run:
+1. Open the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`)
+2. Type **"Preferences: Open User Settings (JSON)"**
+3. Press Enter
 
-```bash
-npm install -g @dynatrace/mcp-server
-```
+### 1.2 Add MCP Server Configuration
 
-### 1.2 Verify Installation
-
-```bash
-dynatrace-mcp --version
-```
-
-You should see the version number printed.
-
----
-
-## Step 2: Configure MCP for VS Code
-
-### 2.1 Create MCP Configuration
-
-Create the VS Code MCP settings file:
-
-```bash
-mkdir -p ~/.vscode-server/data/User/globalStorage/github.copilot
-```
-
-Create the configuration file at `~/.vscode-server/data/User/globalStorage/github.copilot/mcp.json`:
+Add the following configuration to your `settings.json` file. If you already have a `mcp` section, merge this into it:
 
 ```json
 {
-  "mcpServers": {
-    "dynatrace": {
-      "command": "dynatrace-mcp",
-      "args": [],
-      "env": {
-        "DT_ENDPOINT": "https://YOUR_ENV.live.dynatrace.com",
-        "DT_API_TOKEN": "YOUR_API_TOKEN"
+  "mcp": {
+    "servers": {
+      "dynatrace": {
+        "type": "http",
+        "url": "https://YOUR_ENV_ID.apps.dynatrace.com/platform/app-engine/application/dynatrace.mcp.server/api/mcp",
+        "headers": {
+          "Authorization": "Api-Token YOUR_API_TOKEN"
+        }
       }
     }
   }
 }
 ```
 
-### 2.2 Update with Your Credentials
+### 1.3 Update with Your Credentials
 
 Replace the placeholders with your actual Dynatrace credentials (same ones from Lab 0):
 
+| Placeholder | Replace With | Example |
+|-------------|--------------|---------|
+| `YOUR_ENV_ID` | Your Dynatrace environment ID | `abc12345` |
+| `YOUR_API_TOKEN` | Your Dynatrace API token | `dt0c01.XXXXXXXX.YYYYYYYY` |
+
+**Example with real values:**
+
 ```json
 {
-  "mcpServers": {
-    "dynatrace": {
-      "command": "dynatrace-mcp",
-      "args": [],
-      "env": {
-        "DT_ENDPOINT": "https://abc12345.live.dynatrace.com",
-        "DT_API_TOKEN": "dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYY"
+  "mcp": {
+    "servers": {
+      "dynatrace": {
+        "type": "http",
+        "url": "https://abc12345.apps.dynatrace.com/platform/app-engine/application/dynatrace.mcp.server/api/mcp",
+        "headers": {
+          "Authorization": "Api-Token dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYY"
+        }
       }
     }
   }
 }
 ```
 
-> **Tip:** You can copy the values from your `.env` file
+> **Tip:** You can find your environment ID in your `.env` file or from your Dynatrace URL
 
-### 2.3 Restart VS Code
+### 1.4 Save and Reload
 
-For the MCP configuration to take effect:
-
-1. Open the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`)
-2. Type **"Developer: Reload Window"**
-3. Press Enter
+1. Save the `settings.json` file
+2. Open the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`)
+3. Type **"Developer: Reload Window"**
+4. Press Enter
 
 ---
 
-## Step 3: Verify MCP Connection
+## Step 2: Verify MCP Connection
 
 ### 3.1 Open GitHub Copilot Chat
 
@@ -134,11 +122,11 @@ If configured correctly, Copilot will query Dynatrace and return a list of servi
 
 ---
 
-## Step 4: Query Your AI Service
+## Step 3: Query Your AI Service
 
 Let's use MCP to analyze your instrumented AI service.
 
-### 4.1 Find Your Service
+### 3.1 Find Your Service
 
 ```
 @dynatrace Tell me about the service called ai-chat-service-{YOUR_ATTENDEE_ID}
@@ -146,13 +134,13 @@ Let's use MCP to analyze your instrumented AI service.
 
 Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 
-### 4.2 Get Service Metrics
+### 3.2 Get Service Metrics
 
 ```
 @dynatrace What is the average response time for ai-chat-service-jsmith in the last hour?
 ```
 
-### 4.3 Analyze Token Usage
+### 3.3 Analyze Token Usage
 
 ```
 @dynatrace Show me the token usage for my AI service
@@ -160,21 +148,21 @@ Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 
 ---
 
-## Step 5: Explore Traces with MCP
+## Step 4: Explore Traces with MCP
 
-### 5.1 Get Recent Traces
+### 4.1 Get Recent Traces
 
 ```
 @dynatrace Show me the last 5 traces for ai-chat-service-{YOUR_ATTENDEE_ID}
 ```
 
-### 5.2 Analyze Slow Requests
+### 4.2 Analyze Slow Requests
 
 ```
 @dynatrace Are there any slow requests in my AI service? What's causing them?
 ```
 
-### 5.3 Trace Details
+### 4.3 Trace Details
 
 ```
 @dynatrace Explain the trace flow for a typical chat request in my AI service
@@ -182,21 +170,21 @@ Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 
 ---
 
-## Step 6: Problem Analysis
+## Step 5: Problem Analysis
 
-### 6.1 Check for Problems
+### 5.1 Check for Problems
 
 ```
 @dynatrace Are there any open problems in the environment?
 ```
 
-### 6.2 Analyze a Problem (if any exist)
+### 5.2 Analyze a Problem (if any exist)
 
 ```
 @dynatrace Tell me about the most recent problem and its root cause
 ```
 
-### 6.3 Get Recommendations
+### 5.3 Get Recommendations
 
 ```
 @dynatrace Based on my AI service performance, what improvements would you recommend?
@@ -204,9 +192,9 @@ Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 
 ---
 
-## Step 7: Advanced Queries
+## Step 6: Advanced Queries
 
-### 7.1 DQL Queries via MCP
+### 6.1 DQL Queries via MCP
 
 You can ask MCP to run DQL queries:
 
@@ -214,13 +202,13 @@ You can ask MCP to run DQL queries:
 @dynatrace Run this query: fetch spans | filter service.name == "ai-chat-service-jsmith" | summarize count() by span.name
 ```
 
-### 7.2 Compare Performance
+### 6.2 Compare Performance
 
 ```
 @dynatrace Compare the performance of embedding calls vs LLM completion calls in my service
 ```
 
-### 7.3 Cost Analysis
+### 6.3 Cost Analysis
 
 ```
 @dynatrace Estimate the Azure OpenAI API costs based on token usage for my service today
@@ -228,23 +216,23 @@ You can ask MCP to run DQL queries:
 
 ---
 
-## Step 8: Agentic Workflows
+## Step 7: Agentic Workflows
 
 MCP enables powerful agentic workflows where AI assistants can take action based on observability data.
 
-### 8.1 Proactive Analysis
+### 7.1 Proactive Analysis
 
 ```
 @dynatrace Analyze my AI service and suggest optimizations to reduce token usage while maintaining response quality
 ```
 
-### 8.2 Debugging Assistance
+### 7.2 Debugging Assistance
 
 ```
 @dynatrace Help me understand why some of my RAG queries might be slow. Look at the trace data for patterns.
 ```
 
-### 8.3 Documentation Generation
+### 7.3 Documentation Generation
 
 ```
 @dynatrace Generate a summary of my AI service's architecture based on the service flow data
@@ -284,9 +272,9 @@ Practice using MCP for incident response:
 
 ---
 
-## Step 9: MCP Best Practices
+## Step 8: MCP Best Practices
 
-### 9.1 Effective Prompting
+### 8.1 Effective Prompting
 
 **Good prompts are specific:**
 
@@ -294,7 +282,7 @@ Practice using MCP for incident response:
 
 ❌ Vague: `@dynatrace How is my service doing?`
 
-### 9.2 Iterative Queries
+### 8.2 Iterative Queries
 
 Start broad, then drill down:
 
@@ -303,7 +291,7 @@ Start broad, then drill down:
 3. `@dynatrace Why is /chat endpoint slow?`
 4. `@dynatrace Show me slow traces for /chat`
 
-### 9.3 Combining with Code
+### 8.3 Combining with Code
 
 You can use MCP alongside your code:
 
@@ -318,8 +306,7 @@ I'm looking at main.py where I call Azure OpenAI.
 
 Before completing the workshop, verify:
 
-- [ ] Dynatrace MCP server is installed
-- [ ] MCP is configured in VS Code
+- [ ] Remote Dynatrace MCP server is configured in VS Code settings
 - [ ] You can query Dynatrace using `@dynatrace` in Copilot Chat
 - [ ] You've successfully retrieved information about your AI service
 - [ ] You understand how to use MCP for problem analysis
@@ -329,32 +316,43 @@ Before completing the workshop, verify:
 
 ## 🆘 Troubleshooting
 
-### "MCP server not found"
+### "MCP server not responding"
 
-1. Verify installation: `which dynatrace-mcp`
-2. Reinstall: `npm install -g @dynatrace/mcp-server`
+1. Verify your Dynatrace environment URL is correct (should use `.apps.dynatrace.com`)
+2. Check your internet connection
+3. Ensure the Dynatrace MCP server app is enabled in your environment
 
 ### "@dynatrace not recognized"
 
-1. Check the mcp.json configuration file exists
+1. Check the `mcp` configuration in your VS Code `settings.json`
 2. Verify the JSON syntax is valid
-3. Reload VS Code window
+3. Reload VS Code window (`Developer: Reload Window`)
+4. Make sure you're using the correct `mcp.servers` structure
 
-### "Authentication failed"
+### "Authentication failed" or "401 Unauthorized"
 
-1. Verify your API token in the mcp.json file
-2. Ensure the token has appropriate permissions:
+1. Verify your API token in the settings is correct
+2. Ensure the `Authorization` header uses the format: `Api-Token YOUR_TOKEN`
+3. Check that your token has appropriate permissions:
    - `Read entities`
    - `Read problems`
    - `Read metrics`
    - `Read logs`
    - `Read traces`
+   - `Davis Copilot` (for AI-powered insights)
 
 ### "No data returned"
 
-1. Verify the Dynatrace endpoint URL is correct
-2. Check that your service is sending data
+1. Verify the Dynatrace environment URL uses the correct format:
+   `https://YOUR_ENV_ID.apps.dynatrace.com/platform/app-engine/application/dynatrace.mcp.server/api/mcp`
+2. Check that your service is sending data to Dynatrace
 3. Try a simpler query first: `@dynatrace List all services`
+
+### "Connection refused" or "Network error"
+
+1. If in a Codespace, ensure outbound connections are allowed
+2. Check if your organization has firewall rules blocking the connection
+3. Verify the URL doesn't have typos (check for `.apps.` not `.live.`)
 
 ---
 
@@ -362,7 +360,7 @@ Before completing the workshop, verify:
 
 Congratulations! In this lab, you've learned how to:
 
-1. ✅ Install and configure Dynatrace MCP server
+1. ✅ Configure the remote Dynatrace MCP server in VS Code
 2. ✅ Connect your IDE to Dynatrace via MCP
 3. ✅ Query observability data using natural language
 4. ✅ Analyze traces and performance from your IDE
