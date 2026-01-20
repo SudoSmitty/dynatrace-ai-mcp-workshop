@@ -47,7 +47,7 @@ Use the credentials provided by your instructor.
 
    For example: `ai-chat-service-jsmith`
 
-   ![Find Your Service](/assets/images/find-service.png)
+   <img src="/assets/images/find-service.png" alt="Find Your Service" style="max-width: 100%; height: auto; max-height: 400px;" />
 
 ### 2.2 Open Service Details
 
