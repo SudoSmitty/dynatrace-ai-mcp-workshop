@@ -6,7 +6,7 @@ nav_order: 3
 
 # 🔬 Lab 1: AI Instrumentation with OpenLLMetry
 
-**Duration:** ~30 minutes
+**Duration:** ~15 minutes
 
 In this lab, you'll add OpenLLMetry instrumentation to the sample RAG application to send traces to Dynatrace.
 

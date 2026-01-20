@@ -6,7 +6,7 @@ nav_order: 5
 
 # 🤖 Lab 3: Using Dynatrace MCP for Agentic AI
 
-**Duration:** ~45 minutes
+**Duration:** ~30 minutes
 
 In this lab, you'll configure and use the Dynatrace MCP (Model Context Protocol) server to interact with Dynatrace directly from your IDE using AI assistants like GitHub Copilot.
 
