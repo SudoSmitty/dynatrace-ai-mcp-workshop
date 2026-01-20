@@ -43,7 +43,7 @@ Use the credentials provided by your instructor.
 ### 2.1 Navigate to Services
 
 1. In the left navigation menu, click **Services** (or use the search bar)
-2. Look for your service: `ai-chat-service-{YOUR_ATTENDEE_ID}`
+2. Click the **Explorer** tab on the top and look for your service: `ai-chat-service-{YOUR_ATTENDEE_ID}`
 
    For example: `ai-chat-service-jsmith`
 
@@ -51,12 +51,12 @@ Use the credentials provided by your instructor.
 
 ### 2.2 Open Service Details
 
-Click on your service to open the service details page. You'll see:
+Click on your service to select the **Additional Telemetry** page. You'll see:
 
 - Request rate
-- Response time
-- Failure rate
-- Dependencies
+- Request duration
+- Tokens used
+- Embeddings vector size
 
 ---
 
@@ -64,16 +64,15 @@ Click on your service to open the service details page. You'll see:
 
 ### 3.1 Navigate to Traces
 
-1. From your service page, click on **Distributed traces** in the left panel
-2. Or navigate via: **Observe & Explore > Distributed traces**
+1. From your service page, click on **View traces** in the left panel
+2. Or navigate via: **Distributed traces**
 
 ### 3.2 Filter for Your Service
 
 Use the filter to show only traces from your service:
 
-1. Click **Add filter**
-2. Select **Service name**
-3. Choose `ai-chat-service-{YOUR_ATTENDEE_ID}`
+1. Click **Spans** on the left
+4. Choose `ai-chat-service-{YOUR_ATTENDEE_ID}`
 
 ### 3.3 Select a Trace
 
@@ -88,30 +87,39 @@ Click on any trace to view the details. You should see traces for your `/chat` e
 A typical RAG request trace includes these spans:
 
 ```
-📍 POST /chat (HTTP request)
-  └── 📍 azure_openai.embeddings (Embedding generation)
-  └── 📍 chromadb.query (Vector store search)
-  └── 📍 azure_openai.chat (LLM completion)
+📍 rag_chat_pipeline.workflow (Main RAG pipeline)
+  └── 📍 analyze_query_intent.task (Classify user query type)
+      └── 📍 AzureChatOpenAI.chat (LLM call for classification)
+  └── 📍 retrieve_documents.task (Document retrieval)
+      └── 📍 openai.embeddings (Generate query embedding)
+      └── 📍 chroma.query (Vector store search)
+  └── 📍 generate_context.task (Format retrieved docs)
+  └── 📍 generate_response.task (Generate final answer)
+      └── 📍 AzureChatOpenAI.chat (LLM completion call)
 ```
 
 ### 4.2 Examine the LLM Span
 
-Click on the `azure_openai.chat` span to see:
+Click on the `azure_openai.chat` span under the `analyze_query_intent.task` to see:
 
 | Attribute | Description |
 |-----------|-------------|
-| `llm.vendor` | The LLM provider (Azure OpenAI) |
-| `llm.request.type` | Type of request (chat, completion) |
-| `llm.model` | The model used (gpt-4o-mini deployment) |
-| `llm.usage.prompt_tokens` | Number of input tokens |
-| `llm.usage.completion_tokens` | Number of output tokens |
-| `llm.usage.total_tokens` | Total tokens used |
+| `gen_ai.system` | The LLM provider (Azure) |
+| `gen_ai.request.model` | The model requested (gpt-4o-2024-11-20) |
+| `gen_ai.response.model` | The model that responded |
+| `gen_ai.request.temperature` | Temperature setting (e.g., 0.7) |
+| `gen_ai.usage.input_tokens` | Number of input tokens |
+| `gen_ai.usage.output_tokens` | Number of output tokens |
+| `gen_ai.usage.cache_read_input_tokens` | Cached input tokens (prompt caching) |
 
 ### 4.3 View Prompts and Responses
 
 > **Note:** Depending on configuration, you may see:
-> - `llm.prompts` - The input prompt(s)
-> - `llm.completions` - The generated response(s)
+> - `gen_ai.prompt.0.content` - The input prompt content
+> - `gen_ai.prompt.0.role` - The prompt role (user, system)
+> - `gen_ai.completion.0.content` - The generated response content
+> - `gen_ai.completion.0.role` - The completion role (assistant)
+> - `gen_ai.completion.0.finish_reason` - Why generation stopped (stop, length)
 
 This visibility is crucial for debugging AI applications!
 
@@ -129,9 +137,9 @@ Key attributes include:
 
 | Attribute | Description |
 |-----------|-------------|
-| `llm.model` | Embedding model (text-embedding-ada-002) |
-| `llm.usage.prompt_tokens` | Tokens in the text being embedded |
-| `embedding.dimensions` | Vector dimensions (1536 for ada-002) |
+| `gen_ai.request.model` | Embedding model (text-embedding-3-large) |
+| `gen_ai.usage.input_tokens` | Tokens in the text being embedded |
+| `gen_ai.system` | The provider (Azure) |
 
 ---
 
@@ -139,14 +147,18 @@ Key attributes include:
 
 ### 6.1 Find the Vector Store Span
 
-Look for `chromadb.query` or similar vector database spans.
+Look for `chroma.query` or similar vector database spans.
 
 ### 6.2 Key Insights
 
-These spans show:
-- Number of documents retrieved
-- Query time
-- Similarity scores (if available)
+Click on the `chroma.query` span to see database attributes:
+
+| Attribute | Description |
+|-----------|-------------|
+| `db.system` | The vector database (chroma) |
+| `db.operation` | The operation performed (query) |
+| `db.chroma.query.n_results` | Number of documents retrieved (e.g., 3) |
+| `db.chroma.query.embeddings_count` | Number of embeddings in the query (e.g., 1) |
 
 ---
 
@@ -156,8 +168,8 @@ Dynatrace Notebooks provide powerful querying capabilities for AI observability.
 
 ### 7.1 Create a New Notebook
 
-1. Navigate to **Observe & Explore > Notebooks**
-2. Click **+ New Notebook**
+1. Navigate to **Notebooks** in the left-hand menu
+2. Click **+ Notebook** on the top to create a new notebook
 3. Name it: `AI Observability - {YOUR_ATTENDEE_ID}`
 
 ### 7.2 Query: Token Usage Over Time
@@ -167,13 +179,10 @@ Add a new section and enter this DQL query:
 ```sql
 fetch spans
 | filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
-| filter isNotNull(llm.usage.total_tokens)
-| summarize 
-    total_tokens = sum(llm.usage.total_tokens),
-    avg_tokens = avg(llm.usage.total_tokens),
+| filter isNotNull(gen_ai.usage.input_tokens)
+| makeTimeseries total_input_tokens = sum(gen_ai.usage.input_tokens),
+    total_output_tokens = sum(gen_ai.usage.output_tokens),
     request_count = count()
-  by bin(timestamp, 5m)
-| sort timestamp asc
 ```
 
 ### 7.3 Query: Model Usage Distribution
@@ -181,8 +190,8 @@ fetch spans
 ```sql
 fetch spans
 | filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
-| filter isNotNull(llm.model)
-| summarize request_count = count() by llm.model
+| filter isNotNull(gen_ai.request.model)
+| summarize request_count = count(), by: {gen_ai.request.model}
 | sort request_count desc
 ```
 
@@ -193,9 +202,7 @@ fetch spans
 | filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
 | summarize 
     avg_duration = avg(duration),
-    p95_duration = percentile(duration, 95),
-    count = count()
-  by span.name
+  by: {span.name}
 | sort avg_duration desc
 ```
 
@@ -205,13 +212,13 @@ fetch spans
 
 ### 8.1 Create Dashboard
 
-1. Navigate to **Observe & Explore > Dashboards**
-2. Click **+ Dashboard**
+1. Navigate to **Dashboards** in the left-hand menu
+2. Click **+ Dashboard** on the top to create a new dashboard
 3. Name it: `AI Service Monitoring - {YOUR_ATTENDEE_ID}`
 
 ### 8.2 Add Tiles
 
-Add tiles for:
+Add DQL tiles for:
 
 1. **Token Usage** - Line chart of tokens over time
 2. **Request Rate** - Requests per minute
@@ -220,39 +227,20 @@ Add tiles for:
 
 ### 8.3 Example Tile: Token Cost Estimation
 
-Create a custom metric for cost (assuming GPT-4o-mini pricing):
+Create a custom metric for cost (assuming GPT-4o pricing):
 
 ```sql
 fetch spans
 | filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
-| filter isNotNull(llm.usage.total_tokens)
-| summarize 
-    total_tokens = sum(llm.usage.total_tokens),
-    estimated_cost_usd = sum(llm.usage.total_tokens) * 0.00015 / 1000
-  by bin(timestamp, 1h)
+| filter isNotNull(gen_ai.usage.input_tokens)
+| makeTimeseries total_input_tokens = sum(gen_ai.usage.input_tokens),
+    total_output_tokens = sum(gen_ai.usage.output_tokens)
+| fieldsAdd estimated_cost_usd = (arraySum(total_input_tokens) * 0.0025 + arraySum(total_output_tokens) * 0.01) / 1000
 ```
 
 ---
 
-## Step 9: Explore the Service Flow
-
-### 9.1 View Service Dependencies
-
-1. Go back to your service page
-2. Click on **Service flow** in the left panel
-
-### 9.2 Understand the Flow
-
-The service flow shows:
-- Your `ai-chat-service` 
-- Outbound calls to Azure OpenAI APIs
-- Any other dependencies
-
-This visualization helps understand your AI application's architecture.
-
----
-
-## 🔬 Hands-On Exercises
+## 🔬 Additional Hands-On Exercises
 
 Complete these exercises to deepen your understanding:
 
