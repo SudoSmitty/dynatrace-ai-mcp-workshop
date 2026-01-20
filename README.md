@@ -34,9 +34,9 @@ A hands-on workshop for learning AI/LLM observability with Dynatrace and the Mod
 | Lab | Duration | Description |
 |-----|----------|-------------|
 | [Lab 0: Setup](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab0-setup.html) | 15 min | Environment configuration |
-| [Lab 1: Instrumentation](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab1-instrumentation.html) | 30 min | Add OpenLLMetry to the sample app |
-| [Lab 2: Explore Traces](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab2-explore-traces.html) | 45 min | Analyze AI traces in Dynatrace |
-| [Lab 3: Dynatrace MCP](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab3-dynatrace-mcp.html) | 45 min | Use MCP for agentic AI |
+| [Lab 1: Instrumentation](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab1-instrumentation.html) | 15 min | Add OpenLLMetry to the sample app |
+| [Lab 2: Explore Traces](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab2-explore-traces.html) | 30 min | Analyze AI traces in Dynatrace |
+| [Lab 3: Dynatrace MCP](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab3-dynatrace-mcp.html) | 30 min | Use MCP for agentic AI |
 
 ---
 
