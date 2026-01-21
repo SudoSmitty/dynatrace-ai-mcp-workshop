@@ -19,7 +19,7 @@ nav_order: 1
 
 ## 📋 Workshop Overview
 
-| **Duration** | 2 - 2.5 hours |
+| **Duration** | 1.5 - 2 hours |
 | **Level** | Intermediate |
 | **Prerequisites** | GitHub account, basic Python knowledge |
 
@@ -43,9 +43,9 @@ By the end of this workshop, you will be able to:
 | Time | Lab | Description |
 |------|-----|-------------|
 | 15 min | [Lab 0: Environment Setup](lab0-setup) | Configure your GitHub Codespace |
-| 30 min | [Lab 1: AI Instrumentation](lab1-instrumentation) | Add OpenLLMetry to the sample app |
-| 45 min | [Lab 2: Explore Traces](lab2-explore-traces) | Analyze AI traces in Dynatrace |
-| 45 min | [Lab 3: Dynatrace MCP](lab3-dynatrace-mcp) | Use MCP for agentic AI |
+| 15 min | [Lab 1: AI Instrumentation](lab1-instrumentation) | Add OpenLLMetry to the sample app |
+| 30 min | [Lab 2: Explore Traces](lab2-explore-traces) | Analyze AI traces in Dynatrace |
+| 30 min | [Lab 3: Dynatrace MCP](lab3-dynatrace-mcp) | Use MCP for agentic AI |
 
 ---
 
