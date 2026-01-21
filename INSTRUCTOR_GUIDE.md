@@ -99,7 +99,7 @@ You can rotate the workshop token using the GitHub Actions workflow or manually 
 1. Go to the repository's **Actions** tab
 2. Select **"Rotate Workshop Token"** workflow
 3. Click **"Run workflow"**
-4. Optionally enter a custom token (e.g., `dynatrace2026`) or leave empty to auto-generate
+4. Enter a custom token (e.g., `dynatrace2026`)
 5. Click **"Run workflow"**
 6. View the workflow summary to see the new token
 
