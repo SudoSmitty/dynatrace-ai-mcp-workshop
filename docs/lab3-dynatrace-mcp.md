@@ -253,7 +253,7 @@ Ask MCP to analyze a specific aspect of your AI service:
 Practice using MCP for incident response:
 
 ```
-@dynatrace If my AI service suddenly had a 50% increase in response time, what steps would you recommend to diagnose the issue?
+@dynatrace If my ai-chat-service-{YOUR_ATTENDEE_ID} service suddenly had a 50% increase in response time, what steps would you recommend to diagnose the issue?
 ```
 
 ---
@@ -264,7 +264,7 @@ Practice using MCP for incident response:
 
 **Good prompts are specific:**
 
-✅ Good: `@dynatrace Show me the P95 response time for ai-chat-service-sudosmitty over the last 4 hours`
+✅ Good: `@dynatrace Show me the P95 response time for ai-chat-service-{YOUR_ATTENDEE_ID} over the last 4 hours`
 
 ❌ Vague: `@dynatrace How is my service doing?`
 
