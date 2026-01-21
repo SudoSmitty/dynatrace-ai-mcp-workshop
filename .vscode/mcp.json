@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "npx-dynatrace-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "@dynatrace-oss/dynatrace-mcp-server@latest"],
+      "env": {
+        "DT_ENVIRONMENT": ""
+      }
+    }
+  }
+}

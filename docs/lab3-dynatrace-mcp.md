@@ -35,68 +35,60 @@ Think of it as giving your AI assistant **direct access to Dynatrace**!
 
 ---
 
-## Step 1: Configure the Remote Dynatrace MCP Server
+## Step 1: Configure the Dynatrace MCP Server
 
-The Dynatrace MCP server runs **remotely** in your Dynatrace environment—no local installation required! This makes it easy to connect your AI assistant directly to Dynatrace.
+The Dynatrace MCP server is already pre-configured in this workshop! You just need to add your Dynatrace environment URL (provided by your instructor).
 
-### 1.1 Open VS Code Settings
+### 1.1 Open the MCP Configuration
 
-1. Open the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`)
-2. Type **"Preferences: Open User Settings (JSON)"**
-3. Press Enter
+The MCP configuration file is located at `.vscode/mcp.json` in your workspace. Open it:
 
-### 1.2 Add MCP Server Configuration
+1. In the Explorer panel, expand the `.vscode` folder
+2. Click on `mcp.json` to open it
 
-Add the following configuration to your `settings.json` file. If you already have a `mcp` section, merge this into it:
+You'll see the following configuration:
 
 ```json
 {
-  "mcp": {
-    "servers": {
-      "dynatrace": {
-        "type": "http",
-        "url": "https://YOUR_ENV_ID.apps.dynatrace.com/platform/app-engine/application/dynatrace.mcp.server/api/mcp",
-        "headers": {
-          "Authorization": "Api-Token YOUR_API_TOKEN"
-        }
+  "servers": {
+    "npx-dynatrace-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "@dynatrace-oss/dynatrace-mcp-server@latest"],
+      "env": {
+        "DT_ENVIRONMENT": ""
       }
     }
   }
 }
 ```
 
-### 1.3 Update with Your Credentials
+### 1.2 Add Your Dynatrace Environment URL
 
-Replace the placeholders with your actual Dynatrace credentials (same ones from Lab 0):
+Update the `DT_ENVIRONMENT` value with your Dynatrace environment URL (provided by your instructor):
+
+```json
+{
+  "servers": {
+    "npx-dynatrace-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "@dynatrace-oss/dynatrace-mcp-server@latest"],
+      "env": {
+        "DT_ENVIRONMENT": "https://abc12345.apps.dynatrace.com"
+      }
+    }
+  }
+}
+```
 
 | Placeholder | Replace With | Example |
 |-------------|--------------|---------|
-| `YOUR_ENV_ID` | Your Dynatrace environment ID | `abc12345` |
-| `YOUR_API_TOKEN` | Your Dynatrace API token | `dt0c01.XXXXXXXX.YYYYYYYY` |
+| `DT_ENVIRONMENT` | Your Dynatrace environment URL | `https://abc12345.apps.dynatrace.com` |
 
-**Example with real values:**
+> **Tip:** Your environment URL is the same base URL you used to access Dynatrace in your browser from the previous lab exercises (without any path after the domain).
 
-```json
-{
-  "mcp": {
-    "servers": {
-      "dynatrace": {
-        "type": "http",
-        "url": "https://abc12345.apps.dynatrace.com/platform/app-engine/application/dynatrace.mcp.server/api/mcp",
-        "headers": {
-          "Authorization": "Api-Token dt0c01.XXXXXXXXXX.YYYYYYYYYYYYYYYY"
-        }
-      }
-    }
-  }
-}
-```
+### 1.3 Save and Reload
 
-> **Tip:** You can find your environment ID in your `.env` file or from your Dynatrace URL
-
-### 1.4 Save and Reload
-
-1. Save the `settings.json` file
+1. Save/Close the `mcp.json` file (auto-saved if in Codespaces VS Code)
 2. Open the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`)
 3. Type **"Developer: Reload Window"**
 4. Press Enter
@@ -105,12 +97,12 @@ Replace the placeholders with your actual Dynatrace credentials (same ones from 
 
 ## Step 2: Verify MCP Connection
 
-### 3.1 Open GitHub Copilot Chat
+### 2.1 Open GitHub Copilot Chat
 
-1. Click on the Copilot icon in the left sidebar
+1. Click on the Copilot icon on the top bar
 2. Or use keyboard shortcut: `Cmd+Shift+I` (Mac) / `Ctrl+Shift+I` (Windows)
 
-### 3.2 Test the Connection
+### 2.2 Test the Connection
 
 In the Copilot chat, type:
 
@@ -306,7 +298,8 @@ I'm looking at main.py where I call Azure OpenAI.
 
 Before completing the workshop, verify:
 
-- [ ] Remote Dynatrace MCP server is configured in VS Code settings
+- [ ] You've added your `DT_ENVIRONMENT` URL to `.vscode/mcp.json`
+- [ ] You've reloaded VS Code after saving the configuration
 - [ ] You can query Dynatrace using `@dynatrace` in Copilot Chat
 - [ ] You've successfully retrieved information about your AI service
 - [ ] You understand how to use MCP for problem analysis
@@ -316,35 +309,35 @@ Before completing the workshop, verify:
 
 ## 🆘 Troubleshooting
 
-### "MCP server not responding"
+### "MCP server not found"
 
-1. Verify your Dynatrace environment URL is correct (should use `.apps.dynatrace.com`)
-2. Check your internet connection
-3. Ensure the Dynatrace MCP server app is enabled in your environment
+1. Verify Node.js is installed: `node --version`
+2. Ensure the `.vscode/mcp.json` file exists in your workspace
+3. Test MCP server access: `npx @dynatrace-oss/dynatrace-mcp-server@latest --version`
+4. Clear NPM cache if needed: `npm cache clean --force`
 
 ### "@dynatrace not recognized"
 
-1. Check the `mcp` configuration in your VS Code `settings.json`
-2. Verify the JSON syntax is valid
+1. Check that `.vscode/mcp.json` contains the correct configuration
+2. Verify the JSON syntax is valid (no trailing commas, proper quotes)
 3. Reload VS Code window (`Developer: Reload Window`)
-4. Make sure you're using the correct `mcp.servers` structure
+4. Make sure `DT_ENVIRONMENT` is set to your Dynatrace URL
 
 ### "Authentication failed" or "401 Unauthorized"
 
-1. Verify your API token in the settings is correct
-2. Ensure the `Authorization` header uses the format: `Api-Token YOUR_TOKEN`
-3. Check that your token has appropriate permissions:
+1. Verify `DT_ENVIRONMENT` in `.vscode/mcp.json` is correct
+2. Ensure the URL format is `https://YOUR_ENV_ID.apps.dynatrace.com`
+3. Check that your Dynatrace environment allows API access
+4. Check that your token has appropriate permissions:
    - `Read entities`
    - `Read problems`
    - `Read metrics`
    - `Read logs`
    - `Read traces`
-   - `Davis Copilot` (for AI-powered insights)
 
 ### "No data returned"
 
-1. Verify the Dynatrace environment URL uses the correct format:
-   `https://YOUR_ENV_ID.apps.dynatrace.com/platform/app-engine/application/dynatrace.mcp.server/api/mcp`
+1. Verify `DT_ENVIRONMENT` in `.vscode/mcp.json` is correct
 2. Check that your service is sending data to Dynatrace
 3. Try a simpler query first: `@dynatrace List all services`
 
@@ -352,7 +345,7 @@ Before completing the workshop, verify:
 
 1. If in a Codespace, ensure outbound connections are allowed
 2. Check if your organization has firewall rules blocking the connection
-3. Verify the URL doesn't have typos (check for `.apps.` not `.live.`)
+3. Verify the URL format is `https://YOUR_ENV_ID.apps.dynatrace.com`
 
 ---
 
@@ -360,7 +353,7 @@ Before completing the workshop, verify:
 
 Congratulations! In this lab, you've learned how to:
 
-1. ✅ Configure the remote Dynatrace MCP server in VS Code
+1. ✅ Configure the Dynatrace MCP server in VS Code
 2. ✅ Connect your IDE to Dynatrace via MCP
 3. ✅ Query observability data using natural language
 4. ✅ Analyze traces and performance from your IDE
