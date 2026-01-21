@@ -9,7 +9,7 @@ This document provides guidance for instructors running the workshop.
 - [ ] Verify Dynatrace playground tenant access
 - [ ] Create API token with required permissions
 - [ ] Verify Azure OpenAI resource is provisioned and accessible
-- [ ] Deploy the secrets server Azure Function (see [Secrets Server Setup](#secrets-server-setup))
+- [ ] Verify the secrets server Azure Function is accessible (already deployed at `workshop-secrets-server.azurewebsites.net`)
 - [ ] Test Codespace creation end-to-end
 - [ ] Prepare attendee credential sharing document
 
@@ -38,7 +38,9 @@ This document provides guidance for instructors running the workshop.
 
 The workshop uses an Azure Function to securely distribute Azure OpenAI credentials to attendees. This avoids sharing raw API keys and allows token rotation per workshop.
 
-### Initial Deployment (One-Time)
+> **Note:** The secrets server is already deployed at `https://workshop-secrets-server.azurewebsites.net`. You typically do **not** need to redeploy it. The sections below are provided for reference in case you need to set up a new instance or troubleshoot the existing one.
+
+### Initial Deployment (Reference Only - Already Deployed)
 
 ```bash
 # Login to Azure
@@ -70,7 +72,9 @@ cd secrets-server
 func azure functionapp publish workshop-secrets-server
 ```
 
-### Configure Azure OpenAI Credentials (One-Time)
+### Configure Azure OpenAI Credentials (Reference Only)
+
+> **Current Configuration:** The secrets server is already configured with the correct Azure OpenAI credentials. Only update these if credentials have changed.
 
 ```bash
 az functionapp config appsettings set \
@@ -79,10 +83,12 @@ az functionapp config appsettings set \
   --settings \
     AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com" \
     AZURE_OPENAI_API_KEY="your-azure-openai-api-key" \
-    AZURE_OPENAI_CHAT_DEPLOYMENT="gpt-4o-mini" \
-    AZURE_OPENAI_EMBEDDING_DEPLOYMENT="text-embedding-ada-002" \
-    AZURE_OPENAI_API_VERSION="2024-08-01-preview"
+    AZURE_OPENAI_CHAT_DEPLOYMENT="gpt-4o" \
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT="dynatraceRAG" \
+    AZURE_OPENAI_API_VERSION="2025-07-01-preview"
 ```
+
+> **Critical:** The API version must be `2025-07-01-preview` - newer versions return 404 errors. The embedding deployment uses `text-embedding-3-large` under the name `dynatraceRAG`.
 
 ### Generate Workshop Token (Per Workshop)
 
@@ -96,17 +102,6 @@ You can rotate the workshop token using the GitHub Actions workflow or manually 
 4. Optionally enter a custom token (e.g., `dynatrace2026`) or leave empty to auto-generate
 5. Click **"Run workflow"**
 6. View the workflow summary to see the new token
-
-> **Prerequisites:** Configure these in repository Settings → Secrets and variables → Actions:
->
-> **Secrets (for Azure OIDC authentication):**
-> - `AZURE_CLIENT_ID` - Service principal/app client ID
-> - `AZURE_TENANT_ID` - Azure AD tenant ID  
-> - `AZURE_SUBSCRIPTION_ID` - Azure subscription ID
->
-> **Variables:**
-> - `AZURE_RESOURCE_GROUP` - e.g., `rg-workshop-secrets`
-> - `AZURE_FUNCTION_APP_NAME` - e.g., `workshop-secrets-server`
 
 #### Option B: Azure CLI (Manual)
 
@@ -233,11 +228,10 @@ Create a simple slide or document to share with attendees:
 | Time | Activity | Notes |
 |------|----------|-------|
 | 0:00-0:15 | Introduction & Lab 0 | Welcome, objectives, environment setup |
-| 0:15-0:45 | Lab 1 | Instrumentation - most hands-on coding |
-| 0:45-1:30 | Lab 2 | Dynatrace exploration - lots of screen sharing |
-| 1:30-2:15 | Lab 3 | MCP - interactive, exploratory |
-| 2:15-2:30 | Wrap-up | Q&A, resources, feedback |
-
+| 0:15-0:30 | Lab 1 | Instrumentation - most hands-on coding |
+| 0:30-1:00 | Lab 2 | Dynatrace exploration - lots of screen sharing |
+| 1:00-1:30 | Lab 3 | MCP - interactive, exploratory |
+| 1:30-1:45 | Wrap-up | Q&A, resources, feedback |
 ---
 
 ## Common Issues & Solutions
@@ -252,13 +246,14 @@ Create a simple slide or document to share with attendees:
 
 ### Azure OpenAI Errors
 
-**Symptom:** "API key invalid", "Resource not found", or rate limiting
+**Symptom:** "API key invalid", "Resource not found", 404 errors, or rate limiting
 **Solution:**
 1. Verify the secrets server is running: `curl https://workshop-secrets-server.azurewebsites.net/api/health`
 2. Check the workshop token is correct in the secrets server app settings
 3. Check Azure OpenAI resource quotas in Azure Portal
-4. Verify deployment names match (gpt-4o-mini, text-embedding-ada-002)
-5. Have attendees re-run: `bash .devcontainer/fetch-secrets.sh`
+4. Verify deployment names match (`gpt-4o-mini` for chat, `dynatraceRAG` for embeddings)
+5. Verify API version is `2025-07-01-preview` (newer versions return 404)
+6. Have attendees re-run: `bash .devcontainer/fetch-secrets.sh`
 
 ### Invalid Workshop Token
 
