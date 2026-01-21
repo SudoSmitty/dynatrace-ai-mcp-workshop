@@ -21,6 +21,18 @@ Before starting, ensure you have:
 
 ---
 
+## 🏷️ Set Your Attendee ID
+
+Before proceeding, **set your Attendee ID in the sidebar** (on the left side of this page). This will automatically personalize all code examples and commands throughout the workshop labs.
+
+1. Look for the **"Your Attendee ID"** input field in the sidebar
+2. Enter your attendee ID (e.g., your name or initials like `sudosmitty`)
+3. Click **Set** or press Enter
+
+> **💡 Tip:** Your attendee ID is stored in your browser and will persist across all lab pages. You'll see `{YOUR_ATTENDEE_ID}` placeholders replaced with your actual ID throughout the documentation.
+
+---
+
 ## Step 1: Launch GitHub Codespace
 
 1. If you haven't already, click the button below to launch your personal workshop environment:
@@ -50,14 +62,14 @@ bash .devcontainer/fetch-secrets.sh
 ### 2.2 Enter Your Credentials
 
 You'll be prompted for:
-1. **Attendee ID** - Enter your initials (e.g., `jsmith`) or press Enter to auto-generate
+1. **Attendee ID** - Enter your ATTENDEE_ID (e.g., `{YOUR_ATTENDEE_ID}`)
 2. **Workshop Token** - Your instructor will provide this
 
 ```
 🔐 Workshop Credentials Setup
 
-Enter your attendee ID (e.g., your name or initials, no spaces) [press enter to generate]: jsmith
-✅ Attendee ID: jsmith
+Enter your attendee ID (e.g., your name or initials, no spaces) [press enter to generate]: {YOUR_ATTENDEE_ID}
+✅ Attendee ID: {YOUR_ATTENDEE_ID}
 
 Enter your workshop token: dynatrace2026
 ✅ Azure OpenAI credentials configured!
@@ -133,11 +145,11 @@ You should see output similar to:
 ╔══════════════════════════════════════════════════════════════════════╗
 ║         🚀 AI Chat Service Starting...                               ║
 ║                                                                      ║
-║         Attendee ID: jsmith                                          ║
-║         Service: ai-chat-service-jsmith                              ║
+║         Attendee ID: {YOUR_ATTENDEE_ID}                                          ║
+║         Service: ai-chat-service-{YOUR_ATTENDEE_ID}                              ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
-✅ RAG initialized successfully for attendee: jsmith
+✅ RAG initialized successfully for attendee: {YOUR_ATTENDEE_ID}
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
@@ -164,9 +176,8 @@ Press `Ctrl+C` in the terminal to stop the application.
 
 Before proceeding to Lab 1, verify:
 
+- [ ] You've set your **Attendee ID in the sidebar** (code examples should show your ID, not `{YOUR_ATTENDEE_ID}`)
 - [ ] Your Codespace is running
-- [ ] The `.env` file has your `ATTENDEE_ID` (set via Codespace prompt)
-- [ ] The `.env` file has `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_API_KEY` (fetched via workshop token)
 - [ ] The `.env` file has the `DT_ENDPOINT` and `DT_API_TOKEN` from your instructor
 - [ ] The sample application starts without errors
 - [ ] You can access the application in your browser
@@ -193,7 +204,7 @@ If you skipped entering the workshop token during Codespace creation:
 
 If you skipped the Attendee ID prompt or want to change it:
 1. Open the `.env` file
-2. Add an `ATTENDEE_ID=` line with your initials
+2. Add an `ATTENDEE_ID={YOUR_ATTENDEE_ID}` line
 
 ### "Connection refused" on port 8000
 

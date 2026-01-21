@@ -124,8 +124,6 @@ Let's use MCP to analyze your instrumented AI service.
 @dynatrace Tell me about the service called ai-chat-service-{YOUR_ATTENDEE_ID}
 ```
 
-Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
-
 ### 3.2 Analyze Token Usage
 
 ```

@@ -170,17 +170,17 @@ You should see the new instrumentation messages:
 
 ```
 ✅ Traceloop initialized - sending traces to Dynatrace
-   Service Name: ai-chat-service-jsmith
+   Service Name: ai-chat-service-{YOUR_ATTENDEE_ID}
    Endpoint: https://abc12345.live.dynatrace.com/api/v2/otlp
 
 ╔══════════════════════════════════════════════════════════════════════╗
 ║         🚀 AI Chat Service Starting...                               ║
 ║                                                                      ║
-║         Attendee ID: jsmith                                          ║
-║         Service: ai-chat-service-jsmith                              ║
+║         Attendee ID: {YOUR_ATTENDEE_ID}                                          ║
+║         Service: ai-chat-service-{YOUR_ATTENDEE_ID}                              ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
-✅ RAG initialized successfully for attendee: jsmith
+✅ RAG initialized successfully for attendee: {YOUR_ATTENDEE_ID}
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 

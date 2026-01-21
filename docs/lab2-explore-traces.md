@@ -45,7 +45,7 @@ Use the credentials provided by your instructor.
 1. In the left navigation menu, click **Services** (or use the search bar)
 2. Click the **Explorer** tab on the top and look for your service: `ai-chat-service-{YOUR_ATTENDEE_ID}`
 
-   For example: `ai-chat-service-jsmith`
+   For example: `ai-chat-service-{YOUR_ATTENDEE_ID}`
 
    <img src="assets/images/find-service.png" alt="Find Your Service" class="zoomable" style="max-width: 100%; height: auto; max-height: 400px;" title="Click to enlarge" />
 
