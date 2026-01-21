@@ -40,6 +40,20 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-content">
+                <!-- Attendee ID Input -->
+                <div class="attendee-id-container">
+                    <label class="attendee-id-label">Your Attendee ID</label>
+                    <div class="attendee-id-input-wrapper">
+                        <input type="text" 
+                               id="attendee-id-input" 
+                               class="attendee-id-input" 
+                               placeholder="e.g., jsmith"
+                               autocomplete="off">
+                        <button class="attendee-id-btn" onclick="updateAttendeeId()">Set</button>
+                    </div>
+                    <div id="attendee-id-status" class="attendee-id-status"></div>
+                </div>
+
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">Workshop Labs</h3>
                     <ul class="sidebar-nav">
@@ -180,6 +194,69 @@
         .zoomable:hover {
             opacity: 0.85;
         }
+        /* Attendee ID input styling */
+        .attendee-id-container {
+            padding: 12px 16px;
+            background: var(--color-surface, #1a1a2e);
+            border-bottom: 1px solid var(--color-border, #2a2a4a);
+            margin-bottom: 8px;
+        }
+        .attendee-id-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted, #888);
+            margin-bottom: 6px;
+        }
+        .attendee-id-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+        .attendee-id-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid var(--color-border, #2a2a4a);
+            border-radius: 6px;
+            background: var(--color-bg, #0d0d1a);
+            color: var(--color-text, #fff);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+        .attendee-id-input:focus {
+            outline: none;
+            border-color: var(--color-primary, #6366f1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        .attendee-id-input::placeholder {
+            color: var(--color-text-muted, #666);
+        }
+        .attendee-id-btn {
+            padding: 8px 12px;
+            background: var(--color-primary, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .attendee-id-btn:hover {
+            background: var(--color-primary-hover, #5558e3);
+        }
+        .attendee-id-status {
+            font-size: 11px;
+            margin-top: 6px;
+            color: var(--color-success, #22c55e);
+        }
+        /* Highlight replaced text */
+        .attendee-replaced {
+            background: rgba(99, 102, 241, 0.15);
+            padding: 1px 4px;
+            border-radius: 3px;
+            color: #a5b4fc;
+        }
     </style>
 
     <script>
@@ -223,6 +300,85 @@
         // Auto-apply zoomable class to images with the class
         document.querySelectorAll('img.zoomable').forEach(img => {
             img.addEventListener('click', () => openLightbox(img.src));
+        });
+
+        // Attendee ID replacement functionality
+        const ATTENDEE_STORAGE_KEY = 'workshop_attendee_id';
+        const PLACEHOLDER_PATTERN = /\{YOUR_ATTENDEE_ID\}/g;
+
+        function getStoredAttendeeId() {
+            return localStorage.getItem(ATTENDEE_STORAGE_KEY) || '';
+        }
+
+        function setStoredAttendeeId(id) {
+            localStorage.setItem(ATTENDEE_STORAGE_KEY, id);
+        }
+
+        function replaceAttendeeIdInPage(attendeeId) {
+            if (!attendeeId) return;
+            
+            // Find all text nodes and code blocks that contain the placeholder
+            const walker = document.createTreeWalker(
+                document.querySelector('.content') || document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            const textNodes = [];
+            while (walker.nextNode()) {
+                if (PLACEHOLDER_PATTERN.test(walker.currentNode.textContent)) {
+                    textNodes.push(walker.currentNode);
+                }
+            }
+            
+            textNodes.forEach(node => {
+                const span = document.createElement('span');
+                span.innerHTML = node.textContent.replace(
+                    PLACEHOLDER_PATTERN,
+                    `<span class="attendee-replaced">${attendeeId}</span>`
+                );
+                node.parentNode.replaceChild(span, node);
+            });
+        }
+
+        function updateAttendeeId() {
+            const input = document.getElementById('attendee-id-input');
+            const status = document.getElementById('attendee-id-status');
+            const id = input.value.trim();
+            
+            if (id) {
+                setStoredAttendeeId(id);
+                // Reload to apply changes cleanly
+                location.reload();
+            }
+        }
+
+        function clearAttendeeId() {
+            localStorage.removeItem(ATTENDEE_STORAGE_KEY);
+            location.reload();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedId = getStoredAttendeeId();
+            const input = document.getElementById('attendee-id-input');
+            const status = document.getElementById('attendee-id-status');
+            
+            if (input && storedId) {
+                input.value = storedId;
+                if (status) {
+                    status.textContent = `✓ Using: ${storedId}`;
+                }
+                replaceAttendeeIdInPage(storedId);
+            }
+        });
+
+        // Allow Enter key to submit
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.id === 'attendee-id-input') {
+                updateAttendeeId();
+            }
         });
     </script>
 </body>
