@@ -126,16 +126,10 @@ Let's use MCP to analyze your instrumented AI service.
 
 Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 
-### 3.2 Get Service Metrics
+### 3.2 Analyze Token Usage
 
 ```
-@dynatrace What is the average response time for ai-chat-service-jsmith in the last hour?
-```
-
-### 3.3 Analyze Token Usage
-
-```
-@dynatrace Show me the token usage for my AI service
+@dynatrace What is the total input and output token usage for spans in regards to the ai-chat-service-{YOUR_ATTENDEE_ID}
 ```
 
 ---
@@ -151,13 +145,13 @@ Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 ### 4.2 Analyze Slow Requests
 
 ```
-@dynatrace Are there any slow requests in my AI service? What's causing them?
+@dynatrace Are there any slow requests in my ai-chat-service-{YOUR_ATTENDEE_ID} service? What's causing them?
 ```
 
 ### 4.3 Trace Details
 
 ```
-@dynatrace Explain the trace flow for a typical chat request in my AI service
+@dynatrace Explain the trace flow for a typical chat request in my ai-chat-service-{YOUR_ATTENDEE_ID} service
 ```
 
 ---
@@ -179,7 +173,7 @@ Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 ### 5.3 Get Recommendations
 
 ```
-@dynatrace Based on my AI service performance, what improvements would you recommend?
+@dynatrace Based on my ai-chat-service-{YOUR_ATTENDEE_ID} service performance, what improvements would you recommend?
 ```
 
 ---
@@ -191,19 +185,19 @@ Replace `{YOUR_ATTENDEE_ID}` with your actual attendee ID.
 You can ask MCP to run DQL queries:
 
 ```
-@dynatrace Run this query: fetch spans | filter service.name == "ai-chat-service-jsmith" | summarize count() by span.name
+@dynatrace Run this query: fetch spans | filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}" | summarize count(), by: {span.name}
 ```
 
 ### 6.2 Compare Performance
 
 ```
-@dynatrace Compare the performance of embedding calls vs LLM completion calls in my service
+@dynatrace Compare the performance of embedding calls vs LLM completion calls in my ai-chat-service-{YOUR_ATTENDEE_ID} service
 ```
 
 ### 6.3 Cost Analysis
 
 ```
-@dynatrace Estimate the Azure OpenAI API costs based on token usage for my service today
+@dynatrace Estimate the Azure OpenAI API costs based on token usage for my ai-chat-service-{YOUR_ATTENDEE_ID} service today
 ```
 
 ---
@@ -215,7 +209,7 @@ MCP enables powerful agentic workflows where AI assistants can take action based
 ### 7.1 Proactive Analysis
 
 ```
-@dynatrace Analyze my AI service and suggest optimizations to reduce token usage while maintaining response quality
+@dynatrace Analyze my ai-chat-service-{YOUR_ATTENDEE_ID} service and suggest optimizations to reduce token usage while maintaining response quality
 ```
 
 ### 7.2 Debugging Assistance
@@ -227,7 +221,7 @@ MCP enables powerful agentic workflows where AI assistants can take action based
 ### 7.3 Documentation Generation
 
 ```
-@dynatrace Generate a summary of my AI service's architecture based on the service flow data
+@dynatrace Generate a summary of my ai-chat-service-{YOUR_ATTENDEE_ID} service's architecture based on the service flow data
 ```
 
 ---
@@ -251,7 +245,7 @@ Use MCP to generate a health report for your service:
 Ask MCP to analyze a specific aspect of your AI service:
 
 ```
-@dynatrace Analyze the relationship between prompt length and response time in my AI service
+@dynatrace Analyze the relationship between prompt length and response time in my ai-chat-service-{YOUR_ATTENDEE_ID} service
 ```
 
 ### Exercise 3: Incident Response Simulation
@@ -270,7 +264,7 @@ Practice using MCP for incident response:
 
 **Good prompts are specific:**
 
-✅ Good: `@dynatrace Show me the P95 response time for ai-chat-service-jsmith over the last 4 hours`
+✅ Good: `@dynatrace Show me the P95 response time for ai-chat-service-sudosmitty over the last 4 hours`
 
 ❌ Vague: `@dynatrace How is my service doing?`
 
