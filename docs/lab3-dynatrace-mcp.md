@@ -132,9 +132,41 @@ If configured correctly, Copilot will query Dynatrace and return a list of servi
 
 ---
 
-## Step 3: Query Your AI Service
+## 🎭 Your Mission (Choose Your Persona)
 
-Let's use MCP to analyze your instrumented AI service.
+From this point forward, you'll focus on different use cases depending on your role.
+
+<div class="persona-box developer" markdown="1">
+
+### 💻 Developer: "I want to debug without leaving my IDE"
+
+**Your story:** You're deep in code, fixing a bug in your RAG pipeline. Every time you need performance data, you have to context-switch to Dynatrace. What if you could just *ask*?
+
+**Your goal:** Set up MCP so you can query Dynatrace directly from VS Code. Debug while you code!
+
+**Focus on:** Steps 3 and 4 (marked with 💻)
+
+</div>
+
+<div class="persona-box sre" markdown="1">
+
+### 🔧 SRE/Platform: "I need faster incident response"
+
+**Your story:** It's 2 AM and you get paged. Instead of fumbling through dashboards half-asleep, what if you could just ask about the issue?
+
+**Your goal:** Learn to use MCP for rapid incident triage. Get answers in seconds, not minutes.
+
+**Focus on:** Steps 5 and 6 (marked with 🔧)
+
+</div>
+
+---
+
+<div class="persona-box developer" markdown="1">
+
+## 💻 Step 3: Query Your AI Service (Developer)
+
+Use MCP to analyze your instrumented AI service while coding.
 
 ### 3.1 Find Your Service
 
@@ -148,11 +180,9 @@ Let's use MCP to analyze your instrumented AI service.
 @dynatrace What is the total input and output token usage for spans in regards to the ai-chat-service-{YOUR_ATTENDEE_ID}
 ```
 
-<div class="persona-box developer" markdown="1">
+### 3.3 Debug While You Code
 
-### 💻 Developer Use Case
-
-Use MCP while coding to understand your application's behavior:
+Use MCP alongside your code to understand your application's behavior:
 
 ```
 I'm looking at main.py where I call Azure OpenAI.
@@ -161,13 +191,49 @@ I'm looking at main.py where I call Azure OpenAI.
 
 No context switching — debug while you code!
 
+---
+
+## 💻 Step 4: Agentic Debugging Workflows (Developer)
+
+MCP enables powerful agentic workflows where AI assistants can take action based on observability data.
+
+### 4.1 Find the Bottleneck
+
+```
+I'm seeing slow responses in my RAG pipeline. 
+@dynatrace Analyze the trace data and tell me which step is the bottleneck for my ai-chat-service-{YOUR_ATTENDEE_ID} service.
+Is it embeddings, vector search, or the LLM call?
+```
+
+### 4.2 Proactive Analysis
+
+```
+@dynatrace Analyze my ai-chat-service-{YOUR_ATTENDEE_ID} service and suggest optimizations to reduce token usage while maintaining response quality
+```
+
+### 4.3 Debugging Assistance
+
+```
+@dynatrace Help me understand why some of my RAG queries might be slow. Look at the trace data for patterns.
+```
+
 </div>
+
+---
 
 <div class="persona-box sre" markdown="1">
 
-### 🔧 SRE Use Case
+## 🔧 Step 5: Query Your AI Service (SRE)
 
-Use MCP for quick incident triage without leaving your terminal:
+Use MCP for quick incident triage without leaving your terminal.
+
+### 5.1 Find Your Service
+
+```
+@dynatrace Tell me about the service called ai-chat-service-{YOUR_ATTENDEE_ID}
+```
+
+### 5.2 Check for Anomalies
 
 ```
 @dynatrace Are there any anomalies in the last hour for ai-chat-service-{YOUR_ATTENDEE_ID}?
@@ -176,29 +242,19 @@ What's the current error rate and how does it compare to the baseline?
 
 Get Davis AI insights without opening the Dynatrace UI!
 
-</div>
+### 5.3 Analyze Token Usage
+
+```
+@dynatrace What is the total input and output token usage for spans in regards to the ai-chat-service-{YOUR_ATTENDEE_ID}
+```
 
 ---
 
-## Step 4: Agentic Workflows
+## 🔧 Step 6: Agentic Incident Response (SRE)
 
-MCP enables powerful agentic workflows where AI assistants can take action based on observability data.
+MCP enables powerful agentic workflows for incident response directly from your IDE.
 
-<div class="persona-box developer" markdown="1">
-
-### 💻 Developer: Debug While You Code
-
-```
-I'm seeing slow responses in my RAG pipeline. 
-@dynatrace Analyze the trace data and tell me which step is the bottleneck for my ai-chat-service-{YOUR_ATTENDEE_ID} service.
-Is it embeddings, vector search, or the LLM call?
-```
-
-</div>
-
-<div class="persona-box sre" markdown="1">
-
-### 🔧 SRE: Incident Response from Your IDE
+### 6.1 Incident Response
 
 ```
 @dynatrace Are there any open problems affecting my ai-chat-service-{YOUR_ATTENDEE_ID} service?
@@ -206,31 +262,25 @@ If so, what's the root cause and which services are impacted?
 Draft a Slack message summarizing the incident.
 ```
 
-</div>
-
-### 4.1 Proactive Analysis
-
-```
-@dynatrace Analyze my ai-chat-service-{YOUR_ATTENDEE_ID} service and suggest optimizations to reduce token usage while maintaining response quality
-```
-
-### 4.2 Debugging Assistance
-
-```
-@dynatrace Help me understand why some of my RAG queries might be slow. Look at the trace data for patterns.
-```
-
-### 4.3 Documentation Generation
+### 6.2 Service Architecture
 
 ```
 @dynatrace Generate a summary of my ai-chat-service-{YOUR_ATTENDEE_ID} service's architecture based on the service flow data
 ```
 
+### 6.3 Capacity Planning
+
+```
+@dynatrace Analyze my ai-chat-service-{YOUR_ATTENDEE_ID} service and suggest optimizations to reduce token usage while maintaining response quality
+```
+
+</div>
+
 ---
 
-## Step 5: MCP Best Practices
+## Step 7: MCP Best Practices
 
-### 5.1 Effective Prompting
+### 7.1 Effective Prompting
 
 **Good prompts are specific:**
 
@@ -238,7 +288,7 @@ Draft a Slack message summarizing the incident.
 
 ❌ Vague: `@dynatrace How is my service doing?`
 
-### 5.2 Iterative Queries
+### 7.2 Iterative Queries
 
 Start broad, then drill down:
 
@@ -247,7 +297,7 @@ Start broad, then drill down:
 3. `@dynatrace Why is /chat endpoint slow?`
 4. `@dynatrace Show me slow traces for /chat`
 
-### 5.3 Combining with Code
+### 7.3 Combining with Code
 
 You can use MCP alongside your code:
 
@@ -315,11 +365,37 @@ Before completing the workshop, verify:
 
 ## 🎓 What You've Learned
 
-Congratulations! In this lab, you've learned how to:
+<div class="persona-box developer" markdown="1">
 
-1. ✅ Configure the Dynatrace MCP server in VS Code
-2. ✅ Connect your IDE to Dynatrace via MCP
-3. ✅ Query observability data using natural language
+### 💻 Developer Takeaways
+
+You can now debug without leaving your IDE:
+
+1. ✅ Configure Dynatrace MCP in VS Code
+2. ✅ Query your service performance using natural language
+3. ✅ Find bottlenecks in your RAG pipeline from the IDE
+4. ✅ Get optimization suggestions while you code
+5. ✅ Combine code context with observability data
+
+**Your new workflow:** See a slow response? Just ask `@dynatrace` what's happening instead of context-switching to dashboards.
+
+</div>
+
+<div class="persona-box sre" markdown="1">
+
+### 🔧 SRE/Platform Takeaways
+
+You can now respond to incidents faster:
+
+1. ✅ Configure Dynatrace MCP for terminal/IDE access
+2. ✅ Check for anomalies and error rates instantly
+3. ✅ Get Davis AI root cause analysis via natural language
+4. ✅ Draft incident communications directly from MCP
+5. ✅ Query service architecture and capacity data
+
+**Your 2 AM incident response:** Ask `@dynatrace` for the root cause and draft a Slack message — all without opening a browser.
+
+</div>
 
 ---
 

@@ -45,25 +45,57 @@ In this lab, you'll create automated workflows that transform you from someone w
 ### 1.1 Access the Workflows App
 
 1. In Dynatrace, click on the **Workflows** app in the left navigation (or search for it)
-2. Click **+ Workflow** to create a new workflow
-
-### 1.2 Name Your Workflow
-
-Name it: `AI Cost Guardian - {YOUR_ATTENDEE_ID}`
 
 ---
 
-## Step 2: Create a Token Usage Alert Workflow
+## 🎭 Choose Your Persona
+
+From here, focus on the workflows most relevant to your role. Complete at least one workflow, then explore the exercises that match your goals.
+
+<div class="persona-box developer" markdown="1">
+
+### 💻 Developer Path
+
+**Your goal:** Create workflows that alert you before users complain. Sleep better knowing automation has your back.
+
+**Must-do:** Step 2 (Token Usage Alert)
+
+**Exercises:** 1 (Prompt Monitoring) and 2 (Cache Efficiency)
+
+</div>
+
+<div class="persona-box sre" markdown="1">
+
+### 🔧 SRE/Platform Path
+
+**Your goal:** Build the automation that makes you the AI Cost Guardian. This is your "hero moment"!
+
+**Must-do:** Step 3 (Daily Summary) and Step 4 (Davis AI Alerts)
+
+**Exercise:** 3 (Incident Automation)
+
+</div>
+
+---
+
+<div class="persona-box developer" markdown="1">
+
+## 💻 Step 2: Create a Token Usage Alert Workflow
 
 This workflow will alert you when token usage exceeds a threshold — perfect for catching runaway AI costs.
 
-### 2.1 Set the Trigger
+### 2.1 Create a New Workflow
+
+1. Click **+ Workflow**
+2. Name it: `Token Usage Alert - {YOUR_ATTENDEE_ID}`
+
+### 2.2 Set the Trigger
 
 1. Click on the trigger block (the starting point)
 2. Select **Schedule trigger**:
    - Set to run every **15 minutes** for testing
 
-### 2.2 Add a DQL Query Action
+### 2.3 Add a DQL Query Action
 
 1. Click **+ Add action**
 2. Select **Run DQL query**
@@ -83,7 +115,7 @@ fetch spans
 
 4. Name this action: `Get Token Usage`
 
-### 2.3 Add a Condition
+### 2.4 Add a Condition
 
 1. Click **+ Add action** 
 2. Select **Condition**
@@ -93,7 +125,7 @@ fetch spans
    ```
    (Adjust threshold based on your expected usage)
 
-### 2.4 Add a Notification Action
+### 2.5 Add a Notification Action
 
 1. In the **True** branch, click **+ Add action**
 2. Select **Send notification** (Slack, Teams, Email, etc.)
@@ -113,14 +145,18 @@ Token usage exceeded threshold!
 
 ```
 
-### 2.5 Save and Activate
+### 2.6 Save and Activate
 
 1. Click **Save**
 2. Toggle the workflow to **Enabled**
 
+</div>
+
 ---
 
-## Step 3: Daily AI Cost Summary Workflow
+<div class="persona-box sre" markdown="1">
+
+## 🔧 Step 3: Daily AI Cost Summary Workflow
 
 Create a workflow that sends you a daily summary — no more surprise bills!
 
@@ -200,88 +236,7 @@ Add a notification action with a formatted report:
 {% endfor %}
 
 ```
-
----
-
-## Step 4: Anomaly-Based Alert (Davis AI)
-
-<div class="persona-box sre" markdown="1">
-
-### 🔧 SRE/Platform View
-
-Instead of setting static thresholds, let Davis AI learn what's "normal" for your service and alert on anomalies. This eliminates alert fatigue and catches issues you didn't anticipate.
-
 </div>
-
-### 4.1 Create Davis-Powered Workflow
-
-1. Create a new workflow: `AI Anomaly Response - {YOUR_ATTENDEE_ID}`
-2. Set trigger: **Davis problem**
-3. Filter for your service:
-   - Problem category: `Slowdown` or `Error`
-   - Affected entity: `ai-chat-service-{YOUR_ATTENDEE_ID}`
-
-### 4.2 Add Diagnostic Query
-
-When a problem occurs, automatically gather context:
-
-```sql
-fetch spans
-| filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
-| filter timestamp >= now() - 30m
-| summarize 
-    avg_duration_ms = avg(duration) / 1000000,
-    error_count = countIf(otel.status_code == "ERROR"),
-    total_count = count(),
-    p95_duration_ms = percentile(duration, 95) / 1000000,
-  by: {span.name}
-| sort avg_duration_ms desc
-```
-
-### 4.3 Enrich Problem with AI Context
-
-Add the diagnostic results to the problem ticket for faster resolution.
-
----
-
-## 🔬 Additional Hands-On Exercises (Time Permitting)
-
-### Exercise 1: Prompt Length Alert
-
-Create a workflow that alerts when average prompt length exceeds a threshold (indicating potential prompt injection or abuse):
-
-```sql
-fetch spans
-| filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
-| filter isNotNull(gen_ai.usage.input_tokens)
-| summarize avg_input = avg(gen_ai.usage.input_tokens)
-| filter avg_input > 2000
-```
-
-### Exercise 2: Cache Efficiency Monitor
-
-<div class="persona-box developer" markdown="1">
-
-### 💻 Developer View
-
-Monitor your prompt caching effectiveness. Low cache rates mean you're paying more than necessary!
-
-</div>
-
-```sql
-fetch spans
-| filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}"
-| filter isNotNull(gen_ai.usage.cache_read_input_tokens)
-| summarize 
-    cached = sum(gen_ai.usage.cache_read_input_tokens),
-    total = sum(gen_ai.usage.input_tokens)
-| fieldsAdd cache_rate = (cached / total) * 100
-| filter cache_rate < 30
-```
-
-### Exercise 3: Error Rate Automation
-
-Create a workflow that automatically creates an incident ticket when LLM error rate exceeds 5%.
 
 ---
 
@@ -289,8 +244,8 @@ Create a workflow that automatically creates an incident ticket when LLM error r
 
 Before completing this lab, verify:
 
-- [ ] Created a token usage alert workflow
-- [ ] Set up a daily summary workflow
+- [ ] Created a workflow
+- [ ] Set up notification
 - [ ] Tested workflow execution
 - [ ] Understood how Davis AI can trigger workflows
 - [ ] Know how to add conditions and notifications
@@ -322,14 +277,35 @@ Before completing this lab, verify:
 
 ## 🎓 What You've Learned
 
-Congratulations! You've created automated workflows that:
+<div class="persona-box developer" markdown="1">
 
-1. ✅ Monitor AI token usage automatically
-2. ✅ Send daily cost summaries
-3. ✅ Alert on anomalies detected by Davis AI
-4. ✅ Provide actionable context for troubleshooting
+### 💻 Developer Takeaways
 
-**You're now the AI Cost Guardian for your team!** 🦸
+You've built automation that watches your AI service:
+
+1. ✅ Create scheduled workflows that run DQL queries
+2. ✅ Set up token usage alerts with thresholds
+3. ✅ Configure notifications (Slack, Teams, Email)
+4. ✅ Add conditions to avoid alert noise
+
+**Sleep better:** Your workflow will alert you if token usage spikes — before users complain or the bill arrives.
+
+</div>
+
+<div class="persona-box sre" markdown="1">
+
+### 🔧 SRE/Platform Takeaways
+
+You're now the AI Cost Guardian:
+
+1. ✅ Build daily cost summary workflows
+2. ✅ Calculate projected monthly costs automatically
+3. ✅ Identify top token consumers by operation
+4. ✅ Trigger workflows from Davis AI problems
+
+**Take back to your team:** These workflows are production-ready. Customize the thresholds and notification channels for your environment.
+
+</div>
 
 ---
 
