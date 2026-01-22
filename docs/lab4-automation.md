@@ -116,7 +116,7 @@ Token usage exceeded threshold!
 ### 2.5 Save and Activate
 
 1. Click **Save**
-2. Toggle the workflow to **Active**
+2. Toggle the workflow to **Enabled**
 
 ---
 
