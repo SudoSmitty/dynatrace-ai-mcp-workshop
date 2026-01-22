@@ -22,7 +22,7 @@ In this lab, you'll create automated workflows that transform you from someone w
 
 ---
 
-<div class="why-dynatrace">
+<div class="why-dynatrace" markdown="1">
 
 ## 🏆 Why Dynatrace? The Automation Advantage
 
@@ -205,7 +205,7 @@ Add a notification action with a formatted report:
 
 ## Step 4: Anomaly-Based Alert (Davis AI)
 
-<div class="persona-box sre">
+<div class="persona-box sre" markdown="1">
 
 ### 🔧 SRE/Platform View
 
@@ -260,7 +260,7 @@ fetch spans
 
 ### Exercise 2: Cache Efficiency Monitor
 
-<div class="persona-box developer">
+<div class="persona-box developer" markdown="1">
 
 ### 💻 Developer View
 

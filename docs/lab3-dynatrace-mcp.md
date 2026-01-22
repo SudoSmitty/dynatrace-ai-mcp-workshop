@@ -33,7 +33,7 @@ In this lab, you'll configure and use the Dynatrace MCP (Model Context Protocol)
 
 Think of it as giving your AI assistant **direct access to Dynatrace**!
 
-<div class="why-dynatrace">
+<div class="why-dynatrace" markdown="1">
 
 ## 🏆 Why Dynatrace MCP is Different
 
@@ -148,7 +148,7 @@ Let's use MCP to analyze your instrumented AI service.
 @dynatrace What is the total input and output token usage for spans in regards to the ai-chat-service-{YOUR_ATTENDEE_ID}
 ```
 
-<div class="persona-box developer">
+<div class="persona-box developer" markdown="1">
 
 ### 💻 Developer Use Case
 
@@ -163,7 +163,7 @@ No context switching — debug while you code!
 
 </div>
 
-<div class="persona-box sre">
+<div class="persona-box sre" markdown="1">
 
 ### 🔧 SRE Use Case
 
@@ -252,7 +252,7 @@ You can ask MCP to run DQL queries:
 
 MCP enables powerful agentic workflows where AI assistants can take action based on observability data.
 
-<div class="persona-box developer">
+<div class="persona-box developer" markdown="1">
 
 ### 💻 Developer: Debug While You Code
 
@@ -264,7 +264,7 @@ Is it embeddings, vector search, or the LLM call?
 
 </div>
 
-<div class="persona-box sre">
+<div class="persona-box sre" markdown="1">
 
 ### 🔧 SRE: Incident Response from Your IDE
 
