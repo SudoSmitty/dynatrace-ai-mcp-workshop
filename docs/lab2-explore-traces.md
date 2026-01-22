@@ -121,7 +121,11 @@ From this point forward, you'll focus on different aspects depending on your rol
 
 ### 🔧 SRE/Platform: "How much is this AI service costing us?"
 
-**Your story:** Your team just launched an AI feature and leadership wants to know: What's the cost? What's the capacity? Can we scale this?
+**Your story:** Your team just launched an AI feature and leadership wants to know: 
+
+- What's the cost? 
+- What's the capacity? 
+- Can we scale this?
 
 **Your goal:** Build queries that give you token economics visibility, understand cost attribution, and prepare data for capacity planning.
 
