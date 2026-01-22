@@ -46,6 +46,59 @@ else:
 
 # ════════════════════════════════════════════════════════════════════════════
 
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  📋 OPENTELEMETRY LOGGING TO DYNATRACE                                    ║
+# ║                                                                           ║
+# ║  This section configures OpenTelemetry logging to send logs to Dynatrace ║
+# ║  via OTLP. Logs are automatically correlated with traces.                ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
+import logging
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.sdk.resources import Resource
+
+# Get Dynatrace configuration for logging
+DT_ENDPOINT = os.getenv("DT_ENDPOINT")
+DT_API_TOKEN = os.getenv("DT_API_TOKEN")
+ATTENDEE_ID_FOR_LOGS = os.getenv("ATTENDEE_ID", "workshop-attendee")
+
+# Configure OpenTelemetry logging to Dynatrace
+if DT_ENDPOINT and DT_API_TOKEN:
+    # Create a resource with service name
+    resource = Resource.create({
+        "service.name": f"ai-chat-service-{ATTENDEE_ID_FOR_LOGS}"
+    })
+    
+    # Set up the logger provider
+    logger_provider = LoggerProvider(resource=resource)
+    set_logger_provider(logger_provider)
+    
+    # Configure OTLP log exporter
+    log_exporter = OTLPLogExporter(
+        endpoint=f"{DT_ENDPOINT}/v1/logs",
+        headers={"Authorization": f"Api-Token {DT_API_TOKEN}"}
+    )
+    logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
+    
+    # Attach OpenTelemetry handler to Python's root logger
+    otel_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+    logging.getLogger().addHandler(otel_handler)
+    logging.getLogger().setLevel(logging.INFO)
+    
+    print("✅ OpenTelemetry Logging initialized - sending logs to Dynatrace")
+else:
+    # Set up basic logging if Dynatrace is not configured
+    logging.basicConfig(level=logging.INFO)
+    print("ℹ️  Dynatrace logging not configured (DT_ENDPOINT/DT_API_TOKEN not set)")
+
+# Create a logger for this module
+logger = logging.getLogger(__name__)
+
+# ════════════════════════════════════════════════════════════════════════════
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -79,6 +132,10 @@ AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-pre
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup/shutdown events"""
     # Startup
+    logger.info("AI Chat Service starting", extra={
+        "attendee_id": ATTENDEE_ID,
+        "service_name": f"ai-chat-service-{ATTENDEE_ID}"
+    })
     print(f"""
     ╔══════════════════════════════════════════════════════════════════════╗
     ║         🚀 AI Chat Service Starting...                               ║
@@ -89,7 +146,8 @@ async def lifespan(app: FastAPI):
     """)
     initialize_rag()
     yield
-    # Shutdown (nothing to do)
+    # Shutdown
+    logger.info("AI Chat Service shutting down", extra={"attendee_id": ATTENDEE_ID})
 
 # Initialize FastAPI app with attendee-specific naming
 app = FastAPI(
@@ -222,8 +280,13 @@ def retrieve_documents(query: str) -> list:
     This generates embedding + vector search spans
     """
     if not retriever:
+        logger.warning("Document retrieval skipped - retriever not initialized")
         return []
     docs = retriever.invoke(query)
+    logger.info("Documents retrieved from vector store", extra={
+        "query_length": len(query),
+        "documents_found": len(docs)
+    })
     return docs
 
 @task(name="generate_context")
@@ -449,10 +512,20 @@ def initialize_rag():
             | StrOutputParser()
         )
         
+        logger.info("RAG system initialized successfully", extra={
+            "attendee_id": ATTENDEE_ID,
+            "embedding_model": AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+            "chat_model": AZURE_OPENAI_CHAT_DEPLOYMENT,
+            "document_count": len(SAMPLE_DOCUMENTS)
+        })
         print(f"✅ RAG initialized successfully for attendee: {ATTENDEE_ID}")
         return True
         
     except Exception as e:
+        logger.error("Failed to initialize RAG system", extra={
+            "attendee_id": ATTENDEE_ID,
+            "error": str(e)
+        })
         print(f"❌ Failed to initialize RAG: {e}")
         return False
 
@@ -518,7 +591,14 @@ async def chat(request: ChatRequest):
     4. Response generation (LLM call)
     5. Source summarization
     """
+    logger.info("Chat request received", extra={
+        "message_length": len(request.message),
+        "use_rag": request.use_rag,
+        "attendee_id": ATTENDEE_ID
+    })
+    
     if not request.message.strip():
+        logger.warning("Empty message rejected")
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     
     # Add user's original question as a trace attribute for better visibility in Dynatrace
@@ -536,6 +616,11 @@ async def chat(request: ChatRequest):
         if request.use_rag and retriever and llm:
             # Use the workflow-decorated function to group all operations
             response_text, sources = process_rag_chat(request.message)
+            logger.info("RAG chat response generated", extra={
+                "response_length": len(response_text),
+                "sources_count": len(sources) if sources else 0,
+                "mode": "rag"
+            })
         else:
             # Direct LLM call (single LLM span)
             direct_llm = AzureChatOpenAI(
@@ -548,6 +633,10 @@ async def chat(request: ChatRequest):
             response = direct_llm.invoke(request.message)
             response_text = response.content
             sources = None
+            logger.info("Direct LLM response generated", extra={
+                "response_length": len(response_text),
+                "mode": "direct"
+            })
         
         return ChatResponse(
             response=response_text,
@@ -556,6 +645,10 @@ async def chat(request: ChatRequest):
         )
         
     except Exception as e:
+        logger.error("Error processing chat request", extra={
+            "error": str(e),
+            "attendee_id": ATTENDEE_ID
+        })
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
 
 @app.post("/documents")
