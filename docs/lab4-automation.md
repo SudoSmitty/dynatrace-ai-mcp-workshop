@@ -68,7 +68,7 @@ From here, focus on the workflows most relevant to your role. Complete at least 
 
 **Your goal:** Build the automation that makes you the AI Cost Guardian. This is your "hero moment"!
 
-**Must-do:** Step 3 (Daily Summary) and Step 4 (Davis AI Alerts)
+**Must-do:** Step 3 (Daily Summary)
 
 </div>
 
