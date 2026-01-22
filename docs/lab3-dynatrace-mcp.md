@@ -156,7 +156,7 @@ Use MCP while coding to understand your application's behavior:
 
 ```
 I'm looking at main.py where I call Azure OpenAI.
-@dynatrace What's the average latency for Azure OpenAI calls from my service?
+@dynatrace What's the average latency for Azure OpenAI calls from my ai-chat-service-{YOUR_ATTENDEE_ID} service?
 ```
 
 No context switching — debug while you code!
@@ -180,75 +180,7 @@ Get Davis AI insights without opening the Dynatrace UI!
 
 ---
 
-## Step 4: Explore Traces with MCP
-
-### 4.1 Get Recent Traces
-
-```
-@dynatrace Show me the last 5 traces for ai-chat-service-{YOUR_ATTENDEE_ID}
-```
-
-### 4.2 Analyze Slow Requests
-
-```
-@dynatrace Are there any slow requests in my ai-chat-service-{YOUR_ATTENDEE_ID} service? What's causing them?
-```
-
-### 4.3 Trace Details
-
-```
-@dynatrace Explain the trace flow for a typical chat request in my ai-chat-service-{YOUR_ATTENDEE_ID} service
-```
-
----
-
-## Step 5: Problem Analysis
-
-### 5.1 Check for Problems
-
-```
-@dynatrace Are there any open problems in the environment?
-```
-
-### 5.2 Analyze a Problem (if any exist)
-
-```
-@dynatrace Tell me about the most recent problem and its root cause
-```
-
-### 5.3 Get Recommendations
-
-```
-@dynatrace Based on my ai-chat-service-{YOUR_ATTENDEE_ID} service performance, what improvements would you recommend?
-```
-
----
-
-## Step 6: Advanced Queries
-
-### 6.1 DQL Queries via MCP
-
-You can ask MCP to run DQL queries:
-
-```
-@dynatrace Run this query: fetch spans | filter service.name == "ai-chat-service-{YOUR_ATTENDEE_ID}" | summarize count(), by: {span.name}
-```
-
-### 6.2 Compare Performance
-
-```
-@dynatrace Compare the performance of embedding calls vs LLM completion calls in my ai-chat-service-{YOUR_ATTENDEE_ID} service
-```
-
-### 6.3 Cost Analysis
-
-```
-@dynatrace Estimate the Azure OpenAI API costs based on token usage for my ai-chat-service-{YOUR_ATTENDEE_ID} service today
-```
-
----
-
-## Step 7: Agentic Workflows
+## Step 4: Agentic Workflows
 
 MCP enables powerful agentic workflows where AI assistants can take action based on observability data.
 
@@ -258,7 +190,7 @@ MCP enables powerful agentic workflows where AI assistants can take action based
 
 ```
 I'm seeing slow responses in my RAG pipeline. 
-@dynatrace Analyze the trace data and tell me which step is the bottleneck.
+@dynatrace Analyze the trace data and tell me which step is the bottleneck for my ai-chat-service-{YOUR_ATTENDEE_ID} service.
 Is it embeddings, vector search, or the LLM call?
 ```
 
@@ -269,26 +201,26 @@ Is it embeddings, vector search, or the LLM call?
 ### 🔧 SRE: Incident Response from Your IDE
 
 ```
-@dynatrace Are there any open problems affecting production?
+@dynatrace Are there any open problems affecting my ai-chat-service-{YOUR_ATTENDEE_ID} service?
 If so, what's the root cause and which services are impacted?
 Draft a Slack message summarizing the incident.
 ```
 
 </div>
 
-### 7.1 Proactive Analysis
+### 4.1 Proactive Analysis
 
 ```
 @dynatrace Analyze my ai-chat-service-{YOUR_ATTENDEE_ID} service and suggest optimizations to reduce token usage while maintaining response quality
 ```
 
-### 7.2 Debugging Assistance
+### 4.2 Debugging Assistance
 
 ```
 @dynatrace Help me understand why some of my RAG queries might be slow. Look at the trace data for patterns.
 ```
 
-### 7.3 Documentation Generation
+### 4.3 Documentation Generation
 
 ```
 @dynatrace Generate a summary of my ai-chat-service-{YOUR_ATTENDEE_ID} service's architecture based on the service flow data
@@ -296,41 +228,9 @@ Draft a Slack message summarizing the incident.
 
 ---
 
-## 🔬 Hands-On Exercises
+## Step 5: MCP Best Practices
 
-### Exercise 1: Service Health Report
-
-Use MCP to generate a health report for your service:
-
-```
-@dynatrace Create a health report for ai-chat-service-{YOUR_ATTENDEE_ID} including:
-- Request rate
-- Error rate
-- Average response time
-- Token usage summary
-```
-
-### Exercise 2: Custom Analysis
-
-Ask MCP to analyze a specific aspect of your AI service:
-
-```
-@dynatrace Analyze the relationship between prompt length and response time in my ai-chat-service-{YOUR_ATTENDEE_ID} service
-```
-
-### Exercise 3: Incident Response Simulation
-
-Practice using MCP for incident response:
-
-```
-@dynatrace If my ai-chat-service-{YOUR_ATTENDEE_ID} service suddenly had a 50% increase in response time, what steps would you recommend to diagnose the issue?
-```
-
----
-
-## Step 8: MCP Best Practices
-
-### 8.1 Effective Prompting
+### 5.1 Effective Prompting
 
 **Good prompts are specific:**
 
@@ -338,7 +238,7 @@ Practice using MCP for incident response:
 
 ❌ Vague: `@dynatrace How is my service doing?`
 
-### 8.2 Iterative Queries
+### 5.2 Iterative Queries
 
 Start broad, then drill down:
 
@@ -347,7 +247,7 @@ Start broad, then drill down:
 3. `@dynatrace Why is /chat endpoint slow?`
 4. `@dynatrace Show me slow traces for /chat`
 
-### 8.3 Combining with Code
+### 5.3 Combining with Code
 
 You can use MCP alongside your code:
 
@@ -420,8 +320,6 @@ Congratulations! In this lab, you've learned how to:
 1. ✅ Configure the Dynatrace MCP server in VS Code
 2. ✅ Connect your IDE to Dynatrace via MCP
 3. ✅ Query observability data using natural language
-4. ✅ Analyze traces and performance from your IDE
-5. ✅ Use agentic AI for observability workflows
 
 ---
 
