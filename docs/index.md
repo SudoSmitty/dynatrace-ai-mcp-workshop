@@ -19,7 +19,7 @@ nav_order: 1
 
 ## 📋 Workshop Overview
 
-| **Duration** | 1.5 - 2 hours |
+| **Duration** | 2 - 2.5 hours |
 | **Level** | Intermediate |
 | **Prerequisites** | GitHub account, basic Python knowledge |
 
@@ -35,6 +35,7 @@ By the end of this workshop, you will be able to:
 | **📊 Visualize LLM Traces** | See prompts, completions, and token usage |
 | **🔍 Analyze RAG Pipelines** | Debug with distributed tracing |
 | **🤖 Use Dynatrace MCP** | Query observability data from your IDE |
+| **⚡ Automate Workflows** | Build AI cost alerts and daily summaries |
 
 ---
 
@@ -46,6 +47,7 @@ By the end of this workshop, you will be able to:
 | 15 min | [Lab 1: AI Instrumentation](lab1-instrumentation) | Add OpenLLMetry to the sample app |
 | 30 min | [Lab 2: Explore Traces](lab2-explore-traces) | Analyze AI traces in Dynatrace |
 | 30 min | [Lab 3: Dynatrace MCP](lab3-dynatrace-mcp) | Use MCP for agentic AI |
+| 30 min | [Lab 4: Workflow Automation](lab4-automation) | Automate AI cost monitoring |
 
 ---
 

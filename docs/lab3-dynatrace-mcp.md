@@ -33,6 +33,24 @@ In this lab, you'll configure and use the Dynatrace MCP (Model Context Protocol)
 
 Think of it as giving your AI assistant **direct access to Dynatrace**!
 
+<div class="why-dynatrace">
+
+## 🏆 Why Dynatrace MCP is Different
+
+Other tools let you *see* traces. Dynatrace MCP lets you:
+
+| Capability | Basic AI Assistants | Dynatrace MCP |
+|------------|---------------------|---------------|
+| Query observability data | ❌ No access | ✅ Natural language queries |
+| Correlate AI + infrastructure | ❌ Separate tools | ✅ Unified view via Davis AI |
+| Root cause analysis | ❌ You investigate | ✅ Davis AI explains issues |
+| Take action | ❌ Copy/paste to other tools | ✅ Trigger workflows from IDE |
+| Business context | ❌ Technical data only | ✅ Link tokens to user impact |
+
+**The difference:** Ask "Why is my AI service slow?" and get answers that connect LLM latency to Azure region issues to user experience — all in one response.
+
+</div>
+
 ---
 
 ## Step 1: Configure the Dynatrace MCP Server
@@ -130,6 +148,36 @@ Let's use MCP to analyze your instrumented AI service.
 @dynatrace What is the total input and output token usage for spans in regards to the ai-chat-service-{YOUR_ATTENDEE_ID}
 ```
 
+<div class="persona-box developer">
+
+### 💻 Developer Use Case
+
+Use MCP while coding to understand your application's behavior:
+
+```
+I'm looking at main.py where I call Azure OpenAI.
+@dynatrace What's the average latency for Azure OpenAI calls from my service?
+```
+
+No context switching — debug while you code!
+
+</div>
+
+<div class="persona-box sre">
+
+### 🔧 SRE Use Case
+
+Use MCP for quick incident triage without leaving your terminal:
+
+```
+@dynatrace Are there any anomalies in the last hour for ai-chat-service-{YOUR_ATTENDEE_ID}?
+What's the current error rate and how does it compare to the baseline?
+```
+
+Get Davis AI insights without opening the Dynatrace UI!
+
+</div>
+
 ---
 
 ## Step 4: Explore Traces with MCP
@@ -203,6 +251,30 @@ You can ask MCP to run DQL queries:
 ## Step 7: Agentic Workflows
 
 MCP enables powerful agentic workflows where AI assistants can take action based on observability data.
+
+<div class="persona-box developer">
+
+### 💻 Developer: Debug While You Code
+
+```
+I'm seeing slow responses in my RAG pipeline. 
+@dynatrace Analyze the trace data and tell me which step is the bottleneck.
+Is it embeddings, vector search, or the LLM call?
+```
+
+</div>
+
+<div class="persona-box sre">
+
+### 🔧 SRE: Incident Response from Your IDE
+
+```
+@dynatrace Are there any open problems affecting production?
+If so, what's the root cause and which services are impacted?
+Draft a Slack message summarizing the incident.
+```
+
+</div>
 
 ### 7.1 Proactive Analysis
 
@@ -355,20 +427,15 @@ Congratulations! In this lab, you've learned how to:
 
 ## 🚀 Next Steps
 
-Now that you've completed the workshop, consider:
-
-- Exploring more MCP capabilities with your own applications
-- Creating custom dashboards for AI service monitoring
-- Setting up alerts for LLM token usage and latency
-- Integrating MCP into your daily development workflow
+Now that you've completed this lab, continue to Lab 4 to learn how to automate your AI observability workflows!
 
 ---
 
-## 🎉 Workshop Complete!
+## 🎉 Great Progress!
 
-You've successfully completed the Dynatrace AI Observability Workshop! 
+You've learned how to use Dynatrace MCP for agentic AI workflows. Now let's put it all together with automated workflows!
 
 <div class="lab-nav">
   <a href="lab2-explore-traces">← Lab 2: Explore Traces</a>
-  <a href="resources">View Resources →</a>
+  <a href="lab4-automation">Lab 4: Automation →</a>
 </div>

@@ -92,6 +92,13 @@
                             </a>
                         </li>
                         <li>
+                            <a href="{{ '/lab4-automation' | relative_url }}" class="sidebar-link {% if page.url contains 'lab4' %}active{% endif %}">
+                                <span class="sidebar-icon">⚡</span>
+                                Lab 4: Automation
+                                <span class="sidebar-time">30 min</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="{{ '/resources' | relative_url }}" class="sidebar-link {% if page.url contains 'resources' %}active{% endif %}">
                                 <span class="sidebar-icon">📚</span>
                                 Resources
@@ -250,12 +257,25 @@
             margin-top: 6px;
             color: var(--color-success, #22c55e);
         }
-        /* Highlight replaced text */
+        /* Highlight replaced text - high contrast styling */
         .attendee-replaced {
-            background: rgba(99, 102, 241, 0.15);
-            padding: 1px 4px;
+            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+        }
+        /* Special handling for replaced text inside code blocks */
+        code .attendee-replaced,
+        pre .attendee-replaced {
+            background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+            color: #FFFFFF;
+            padding: 1px 6px;
             border-radius: 3px;
-            color: #a5b4fc;
         }
     </style>
 

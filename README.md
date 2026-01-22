@@ -26,6 +26,7 @@ A hands-on workshop for learning AI/LLM observability with Dynatrace and the Mod
 - ✅ Send traces to Dynatrace via OTLP
 - ✅ Analyze LLM performance, token usage, and costs
 - ✅ Use Dynatrace MCP for agentic AI workflows
+- ✅ Automate AI cost monitoring with Dynatrace Workflows
 
 ---
 
@@ -37,6 +38,7 @@ A hands-on workshop for learning AI/LLM observability with Dynatrace and the Mod
 | [Lab 1: Instrumentation](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab1-instrumentation.html) | 15 min | Add OpenLLMetry to the sample app |
 | [Lab 2: Explore Traces](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab2-explore-traces.html) | 30 min | Analyze AI traces in Dynatrace |
 | [Lab 3: Dynatrace MCP](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab3-dynatrace-mcp.html) | 30 min | Use MCP for agentic AI |
+| [Lab 4: Automation](https://sudosmitty.github.io/dynatrace-ai-mcp-workshop/lab4-automation.html) | 30 min | Create automated workflows |
 
 ---
 
