@@ -50,7 +50,7 @@ In this lab, you'll create automated workflows that transform you from someone w
 
 ## 🎭 Choose Your Persona
 
-From here, focus on the workflows most relevant to your role. Complete at least one workflow, then explore the exercises that match your goals.
+From here, focus on the workflows most relevant to your role. Complete at least one workflow.
 
 <div class="persona-box developer" markdown="1">
 
@@ -59,8 +59,6 @@ From here, focus on the workflows most relevant to your role. Complete at least 
 **Your goal:** Create workflows that alert you before users complain. Sleep better knowing automation has your back.
 
 **Must-do:** Step 2 (Token Usage Alert)
-
-**Exercises:** 1 (Prompt Monitoring) and 2 (Cache Efficiency)
 
 </div>
 
@@ -71,8 +69,6 @@ From here, focus on the workflows most relevant to your role. Complete at least 
 **Your goal:** Build the automation that makes you the AI Cost Guardian. This is your "hero moment"!
 
 **Must-do:** Step 3 (Daily Summary) and Step 4 (Davis AI Alerts)
-
-**Exercise:** 3 (Incident Automation)
 
 </div>
 
