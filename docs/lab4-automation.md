@@ -88,13 +88,13 @@ This workflow will alert you when token usage exceeds a threshold — perfect fo
 ### 2.2 Set the Trigger
 
 1. Click on the trigger block (the starting point)
-2. Select **Schedule trigger**:
+2. Select **Time Interval trigger**:
    - Set to run every **15 minutes** for testing
 
 ### 2.3 Add a DQL Query Action
 
-1. Click **+ Add action**
-2. Select **Run DQL query**
+1. Click **+ Add task**
+2. Select **Execute DQL query**
 3. Enter this query:
 
 ```sql
@@ -109,42 +109,45 @@ fetch spans
 | fieldsAdd estimated_cost_usd = (total_input_tokens * 2.50 + total_output_tokens * 10.00) / 1000000
 ```
 
-4. Name this action: `Get Token Usage`
+4. Name this task: `get_token_usage`
 
-### 2.4 Add a Condition
+### 2.4 Add a Notification Action
 
-1. Click **+ Add action** 
-2. Select **Condition**
-3. Set the condition:
-   ```
-   result.records[0].total_tokens > 10000
-   ```
-   (Adjust threshold based on your expected usage)
-
-### 2.5 Add a Notification Action
-
-1. In the **True** branch, click **+ Add action**
-2. Select **Send notification** (Slack, Teams, Email, etc.)
+1. Add an **Email** -> **Send email** task
 3. Configure your message:
 
+{% raw %}
 ```
-🚨 AI Token Alert - {YOUR_ATTENDEE_ID}
+🚨 AI Token Alert - sudosmitty
 
 Token usage exceeded threshold!
 
 📊 Stats:
-• Total Tokens: {{ result.records[0].total_tokens }}
-• Input Tokens: {{ result.records[0].total_input_tokens }}
-• Output Tokens: {{ result.records[0].total_output_tokens }}
-• Estimated Cost: ${{ result.records[0].estimated_cost_usd | round(4) }}
-• Request Count: {{ result.records[0].request_count }}
+• Total Tokens: {{ result("get_token_usage").records[0].total_tokens }}
+• Input Tokens: {{ result("get_token_usage").records[0].total_input_tokens }}
+• Output Tokens: {{ result("get_token_usage").records[0].total_output_tokens }}
+• Estimated Cost: ${{ result("get_token_usage").records[0].estimated_cost_usd | round(4) }}
+• Request Count: {{ result("get_token_usage").records[0].request_count }}
 
 ```
+{% endraw %}
 
-### 2.6 Save and Activate
+### 2.4 Add a Condition
 
-1. Click **Save**
-2. Toggle the workflow to **Enabled**
+1. Select **Condition**
+2. Set the condition:
+{% raw %}
+   ```
+   {{ result("get_token_usage").records[0].total_tokens > 1000 }}
+   ```
+{% endraw %}
+   (Adjust threshold based on your expected usage)
+
+### 2.6 Save and Deploy
+
+1. Click **Deploy**
+2. Click **Save and Deploy** on the pop-up
+2. Click **Run**
 
 </div>
 
@@ -163,12 +166,12 @@ Create a workflow that sends you a daily summary — no more surprise bills!
 
 ### 3.2 Set Schedule Trigger
 
-1. Select **Schedule trigger**
+1. Select **Fix Time trigger**
 2. Configure: **Daily at 9:00 AM** (or your preferred time)
 
 ### 3.3 Add Comprehensive DQL Query
 
-Add a **Run DQL query** action with:
+Add a **Execute DQL query** task named `usage` with:
 
 ```sql
 fetch spans
@@ -188,7 +191,7 @@ fetch spans
 
 ### 3.4 Add Summary Query
 
-Add another **Run DQL query** action:
+Add another **Execute DQL query** task named `cost` with:
 
 ```sql
 fetch spans
@@ -205,33 +208,29 @@ fetch spans
 
 ### 3.5 Send Daily Report
 
-Add a notification action with a formatted report:
+1. Add an **Email** -> **Send email** task
+3. Configure your message:
 
+{% raw %}
 ```
 📊 Daily AI Service Report - {YOUR_ATTENDEE_ID}
 
 ═══════════════════════════════════════
 💰 COST SUMMARY
 ═══════════════════════════════════════
-• Today's Estimated Cost: ${{ summary.estimated_daily_cost | round(4) }}
-• Projected Monthly Cost: ${{ summary.projected_monthly_cost | round(2) }}
+• Today's Estimated Cost: ${{ result("cost").records[0].estimated_daily_cost | round(4) }}
+• Projected Monthly Cost: ${{ result("cost").records[0].projected_monthly_cost | round(2) }}
 
 ═══════════════════════════════════════
 📈 USAGE METRICS
 ═══════════════════════════════════════
-• Total Requests: {{ summary.total_requests }}
-• Total Input Tokens: {{ summary.total_input | round(0) }}
-• Total Output Tokens: {{ summary.total_output | round(0) }}
-• Avg Response Time: {{ summary.avg_latency_ms | round(2) }}ms
-
-═══════════════════════════════════════
-🔝 TOP TOKEN CONSUMERS
-═══════════════════════════════════════
-{% for op in operations %}
-• {{ op.span_name }}: {{ op.total_input + op.total_output }} tokens
-{% endfor %}
+• Total Requests: {{ result("usage").records | map(attribute="request_count") | map("int") | sum }}
+• Total Input Tokens: {{ result("usage").records | map(attribute="total_input") | map("int") | sum }}
+• Total Output Tokens: {{ result("usage").records | map(attribute="total_output") | map("int") | sum }}
+• Avg Response Time: {{ result("cost").records[0].avg_latency_ms }}ms
 
 ```
+{% endraw %}
 </div>
 
 ---
