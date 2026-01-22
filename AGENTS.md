@@ -30,7 +30,7 @@ cd docs && bundle install && bundle exec jekyll serve
 app/main.py          # FastAPI + LangChain RAG app (MAIN FILE attendees modify)
 app/static/          # Chat UI (marked.js for markdown, highlight.js for code)
 secrets-server/      # Azure Function - distributes Azure OpenAI creds via token
-docs/                # Jekyll GitHub Pages - lab guides (lab0-lab3)
+docs/                # Jekyll GitHub Pages - lab guides (lab0-lab4)
 solutions/           # Reference instrumented app (instructor use)
 .devcontainer/       # Codespace config (Python 3.11, Node 20)
 ```
@@ -89,6 +89,16 @@ Attendees add code at this marker in `app/main.py`:
 # ╚══════════════════════════════════════════════════════════════════════════╝
 # ---> ADD YOUR INSTRUMENTATION CODE HERE <---
 ```
+
+## Workshop Labs Overview
+
+| Lab | Focus | Persona Value |
+|-----|-------|---------------|
+| Lab 0 | Environment Setup | All |
+| Lab 1 | Add Instrumentation | Developer: See your code in traces |
+| Lab 2 | Explore Traces & Token Economics | Developer: Debug RAG pipeline; SRE: Cost analysis |
+| Lab 3 | Dynatrace MCP | Developer: Debug while coding; SRE: Incident response from IDE |
+| Lab 4 | Workflow Automation | SRE: Automate cost alerts, daily summaries ("Hero Moment") |
 
 ## Known Issues & Fixes
 
