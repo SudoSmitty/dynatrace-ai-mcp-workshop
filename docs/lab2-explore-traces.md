@@ -97,7 +97,43 @@ Click on any trace to view the details. You should see traces for your `/chat` e
 
 ---
 
-## Step 4: Analyze an AI Trace
+## 🎭 Your Mission (Choose Your Persona)
+
+From this point forward, you'll focus on different aspects depending on your role. Both paths cover all steps, but with different emphasis.
+
+<div class="persona-box developer" markdown="1">
+
+### 💻 Developer: "Why is my RAG giving bad answers?"
+
+**Your story:** You've deployed a RAG-powered chatbot, but users are complaining that sometimes it gives irrelevant or incomplete answers. You need to understand:
+
+- Is the **vector search** retrieving the right documents?
+- Is the **context** being formatted correctly for the LLM?
+- What **prompts** are actually being sent to the model?
+
+**Your goal:** Learn to trace a request end-to-end, inspect prompts/completions, and identify where your RAG pipeline might be breaking down.
+
+**Focus on:** Steps 4, 5, and 6 (marked with 💻)
+
+</div>
+
+<div class="persona-box sre" markdown="1">
+
+### 🔧 SRE/Platform: "How much is this AI service costing us?"
+
+**Your story:** Your team just launched an AI feature and leadership wants to know: What's the cost? What's the capacity? Can we scale this?
+
+**Your goal:** Build queries that give you token economics visibility, understand cost attribution, and prepare data for capacity planning.
+
+**Focus on:** Steps 7 and 8 (marked with 🔧)
+
+</div>
+
+---
+
+<div class="persona-box developer" markdown="1">
+
+## 💻 Step 4: Analyze an AI Trace
 
 ### 4.1 Understanding the Trace Structure
 
@@ -114,28 +150,6 @@ A typical RAG request trace includes these spans:
   └── 📍 generate_response.task (Generate final answer)
       └── 📍 AzureChatOpenAI.chat (LLM completion call)
 ```
-
-<div class="persona-box developer" markdown="1">
-
-### 💻 Developer Focus
-
-As a developer, focus on **debugging your RAG pipeline**:
-- Is the right context being retrieved? Check `chroma.query` results
-- What prompt is being sent? Inspect `gen_ai.prompt.0.content`
-- Why did the model give that response? Look at `gen_ai.completion.0.content`
-
-</div>
-
-<div class="persona-box sre" markdown="1">
-
-### 🔧 SRE/Platform Focus
-
-As an SRE, focus on **cost and performance**:
-- How many tokens are being used? Track `gen_ai.usage.*` attributes
-- What's the latency breakdown? Compare span durations
-- Are we hitting rate limits? Look for error spans
-
-</div>
 
 ### 4.2 Examine the LLM Span
 
@@ -164,7 +178,7 @@ This visibility is crucial for debugging AI applications!
 
 ---
 
-## Step 5: Analyze Embedding Spans
+## 💻 Step 5: Analyze Embedding Spans
 
 ### 5.1 Find the Embedding Span
 
@@ -182,7 +196,7 @@ Key attributes include:
 
 ---
 
-## Step 6: Vector Store Spans
+## 💻 Step 6: Vector Store Spans
 
 ### 6.1 Find the Vector Store Span
 
@@ -199,9 +213,13 @@ Click on the `chroma.query` span to see database attributes:
 | `db.chroma.query.n_results` | Number of documents retrieved (e.g., 3) |
 | `db.chroma.query.embeddings_count` | Number of embeddings in the query (e.g., 1) |
 
+</div>
+
 ---
 
-## Step 7: Using Notebooks for AI Analysis
+<div class="persona-box sre" markdown="1">
+
+## 🔧 Step 7: Using Notebooks for AI Analysis
 
 Dynatrace Notebooks provide powerful querying capabilities for AI observability.
 
@@ -247,9 +265,7 @@ fetch spans
 
 ---
 
-<div class="token-economics" markdown="1">
-
-## Step 8: Token Economics Analysis
+## 🔧 Step 8: Token Economics Analysis
 
 ### Understanding Token Costs
 
@@ -260,8 +276,6 @@ Tokens directly translate to cost. Here's the current Azure OpenAI pricing:
 | GPT-4o | $2.50 | $10.00 |
 | GPT-4o-mini | $0.15 | $0.60 |
 | text-embedding-3-large | $0.13 | N/A |
-
-</div>
 
 ### 8.1 Find Your Biggest Token Spenders
 
@@ -280,16 +294,7 @@ fetch spans
 | sort estimated_cost_usd desc
 ```
 
-<div class="persona-box developer" markdown="1">
-
-### 💻 Developer Action
-
-**High avg_input tokens?** Your system prompt or context might be too large. Consider:
-- Summarizing retrieved documents before adding to context
-- Using a smaller embedding model for initial retrieval
-- Implementing semantic chunking to reduce noise
-
-</div>
+> 💡 **Tip:** High avg_input tokens? Your system prompt or context might be too large. Consider summarizing retrieved documents before adding to context.
 
 ### 8.2 Prompt Caching Effectiveness
 
@@ -305,16 +310,7 @@ fetch spans
 | fieldsAdd cache_rate_percent = (toDouble(cached_tokens) / toDouble(total_tokens)) * 100
 ```
 
-<div class="persona-box sre" markdown="1">
-
-### 🔧 SRE Action
-
-**Low cache rate (<30%)?** You're paying more than necessary!
-- Standardize system prompts across requests
-- Use longer static prefixes (1024+ tokens)
-- Consider prompt templates that maximize shared content
-
-</div>
+> 💡 **Tip:** Low cache rate (<30%)? You're paying more than necessary! Standardize system prompts and use longer static prefixes (1024+ tokens).
 
 ### 8.3 Token Trend Analysis
 
@@ -339,6 +335,8 @@ fetch spans
 | Low cache rate | Inconsistent prompts | Standardize prompt templates |
 | Token spikes | Potential abuse/bugs | Set up alerts, investigate queries |
 | Output > Input | Complex questions | Normal for detailed answers |
+
+</div>
 
 ---
 
@@ -379,7 +377,43 @@ Before proceeding to Lab 3, verify you can:
 
 ---
 
-## 🎉 Great Progress!
+## � What You've Learned
+
+<div class="persona-box developer" markdown="1">
+
+### 💻 Developer Takeaways
+
+You now know how to debug your RAG pipeline using traces:
+
+1. ✅ Navigate the trace structure to understand your RAG workflow
+2. ✅ Inspect LLM spans to see prompts, completions, and model parameters
+3. ✅ Analyze embedding spans to verify query vectorization
+4. ✅ Check vector store spans to confirm document retrieval
+5. ✅ Use span attributes to debug why your AI gives certain responses
+
+**Next time your RAG gives a bad answer:** Open the trace, check the retrieved documents, and inspect what prompt was actually sent to the LLM.
+
+</div>
+
+<div class="persona-box sre" markdown="1">
+
+### 🔧 SRE/Platform Takeaways
+
+You now have visibility into AI service costs and performance:
+
+1. ✅ Create Notebooks with DQL queries for token analysis
+2. ✅ Calculate estimated costs using token pricing formulas
+3. ✅ Monitor prompt caching effectiveness to optimize spend
+4. ✅ Track token trends over time to catch runaway costs
+5. ✅ Identify your biggest token spenders by operation
+
+**Take back to your team:** The DQL queries you built — they're ready for dashboards and alerts.
+
+</div>
+
+---
+
+## �🎉 Great Progress!
 
 You've explored AI traces in Dynatrace and understand how to analyze LLM observability data. Now let's learn how to use Dynatrace MCP for agentic AI interactions!
 
