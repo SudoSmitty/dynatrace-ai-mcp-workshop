@@ -319,6 +319,22 @@ Check your `.env` file has both:
 - `DT_ENDPOINT` set correctly
 - `DT_API_TOKEN` set correctly
 
+### "Error initializing LangChain instrumentor: cannot import name 'GenAICustomOperationName'"
+
+This error appears at startup when a newer version of `traceloop-sdk` (≥ 0.53.0) is installed. Versions 0.53.0+ of `opentelemetry-instrumentation-langchain` reference a class (`GenAICustomOperationName`) that does not yet exist in the `opentelemetry-semantic-conventions-ai` package, causing the LangChain instrumentor to fail silently.
+
+**Fix:** Install the exact pinned versions from `requirements.txt`:
+
+```bash
+pip install traceloop-sdk==0.50.1 opentelemetry-exporter-otlp==1.39.1
+```
+
+If you accidentally installed a newer version, force the downgrade with:
+
+```bash
+pip install --force-reinstall traceloop-sdk==0.50.1 opentelemetry-exporter-otlp==1.39.1
+```
+
 ### Application crashes after adding instrumentation
 
 1. Check for syntax errors in your code

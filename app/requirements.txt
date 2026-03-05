@@ -20,8 +20,8 @@ opentelemetry-instrumentation-fastapi
 
 # OpenLLMetry/Traceloop for instrumentation
 # Attendees will uncomment these during the lab
-# traceloop-sdk>=0.50.0
-# opentelemetry-exporter-otlp>=1.39.0
+# traceloop-sdk==0.50.1
+# opentelemetry-exporter-otlp==1.39.1
 
 # OpenTelemetry Logging (pre-configured for Dynatrace)
 opentelemetry-sdk>=1.39.0

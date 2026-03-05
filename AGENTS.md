@@ -124,6 +124,7 @@ Used in Lab 3 for practicing error investigation with Dynatrace MCP.
 | 404 from Azure OpenAI | Wrong API version | Use `2025-07-01-preview` |
 | Prompt caching not working | System prompt < 1024 tokens | `RAG_SYSTEM_PROMPT` is 1,200+ tokens |
 | Deprecation warning on startup | `@app.on_event("startup")` | Use `lifespan` context manager |
+| `GenAICustomOperationName` import error on startup | `opentelemetry-instrumentation-langchain>=0.53.0` references a missing class | Pin `traceloop-sdk==0.50.1` and `opentelemetry-exporter-otlp==1.39.1` |
 
 ## Protected Files
 
